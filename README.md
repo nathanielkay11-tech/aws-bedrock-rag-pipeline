@@ -146,15 +146,18 @@ rather than retrieval.
 ---
 
 ## 🏗️ Architecture Overview
+
+```mermaid
 graph LR
-A[Legal Contract PDFs] --> B[Amazon S3]
-B --> C[Bedrock Knowledge Base]
-C --> D[OpenSearch Serverless]
-E[User Query] --> F[Amazon API Gateway]
-F --> G[AWS Lambda]
-G --> C
-C --> H[Amazon Bedrock Claude]
-H --> I[Answer + Source Citations]
+    A[Legal Contract PDFs] --> B[Amazon S3]
+    B --> C[Bedrock Knowledge Base]
+    C --> D[OpenSearch Serverless]
+    E[User Query] --> F[Amazon API Gateway]
+    F --> G[AWS Lambda]
+    G --> C
+    C --> H[Amazon Bedrock Claude]
+    H --> I[Answer + Source Citations]
+```
 
 ---
 
