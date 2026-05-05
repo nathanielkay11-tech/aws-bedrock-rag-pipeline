@@ -149,13 +149,13 @@ rather than retrieval.
 
 ```mermaid
 graph LR
-    A[Legal Contract PDFs] --> B[Amazon S3]
+    A[Lawyer uploads PDF] -->|matters/matter-name/doc-type/file.pdf| B[Amazon S3]
     B -->|S3 ObjectCreated event| C[Ingestion Lambda]
-    C -->|start_ingestion_job| D[Bedrock Knowledge Base]
-    D --> E[OpenSearch Serverless]
-    F[User Query] --> G[Amazon API Gateway]
+    C -->|Extracts metadata from folder path| D[Bedrock Knowledge Base]
+    D <--> E[OpenSearch Serverless\nvector store]
+    F[Lawyer query + matter filter] --> G[Amazon API Gateway]
     G --> H[Query Lambda]
-    H -->|RetrieveAndGenerate| D
+    H -->|RetrieveAndGenerate + metadata filter| D
     D --> I[Amazon Bedrock Claude]
     I --> J[Answer + Source Citations]
 ```
