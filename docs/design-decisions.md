@@ -159,3 +159,22 @@ from the source system. See `docs/phase-two-additions.md`.
 **Outcome:** Phase 1 delivers a complete standalone RAG 
 system for small to mid-size firms. Phase 2 roadmap 
 documented separately.
+
+---
+
+## ADR-009: Knowledge Base ID Passed via Terraform Environment Variable
+**Date:** 05 May 2026
+**Decision:** Terraform passes the Bedrock Knowledge Base ID to 
+the ingestion Lambda as an environment variable at deploy time.
+**Reason:** The alternative — Lambda fetching the Knowledge Base 
+ID dynamically at runtime via an API call — adds unnecessary 
+latency to every invocation and requires additional IAM 
+permissions. The Knowledge Base ID is stable after deployment 
+and Terraform automatically updates the environment variable 
+if the Knowledge Base is ever recreated.
+**Alternatives considered:** Dynamic runtime lookup via 
+boto3 describe call — rejected due to unnecessary API overhead 
+on every invocation with no meaningful benefit.
+**Outcome:** Knowledge Base ID injected as Lambda environment 
+variable by Terraform at deploy time. No runtime API calls 
+required to resolve the ID.
