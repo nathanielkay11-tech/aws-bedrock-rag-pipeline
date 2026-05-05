@@ -151,21 +151,28 @@ rather than retrieval.
 graph TD
     UI[HTML Frontend]
 
-    UI -->|Lawyer uploads PDF| UF
-    UI -->|Lawyer types question| QF
-
-    subgraph UF[Upload Flow]
-        U1[Amazon S3] -->|ObjectCreated event| U2[Ingestion Lambda]
-        U2 -->|start_ingestion_job| U3[Bedrock Knowledge Base]
-        U3 <-->|Store embeddings| U4[OpenSearch Serverless]
+    subgraph Upload Flow
+        direction TD
+        A1[Amazon S3]
+        A2[Ingestion Lambda]
+        A3[Bedrock Knowledge Base]
+        A4[OpenSearch Serverless]
+        A1 --> A2 --> A3 <--> A4
     end
 
-    subgraph QF[Query Flow]
-        Q1[Amazon API Gateway] --> Q2[Query Lambda]
-        Q2 -->|RetrieveAndGenerate| U3
-        U3 --> Q3[Amazon Bedrock Claude]
-        Q3 -->|Answer + Source Citations| UI
+    subgraph Query Flow
+        direction TD
+        B1[Amazon API Gateway]
+        B2[Query Lambda]
+        B3[Amazon Bedrock Claude]
+        B4[Answer + Source Citations]
+        B1 --> B2 --> B3 --> B4
     end
+
+    UI -->|Lawyer uploads PDF| A1
+    UI -->|Lawyer types question| B1
+    B2 -->|RetrieveAndGenerate| A3
+    B4 --> UI
 ```
 
 ---
