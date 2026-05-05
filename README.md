@@ -157,11 +157,13 @@ graph TD
     end
 
     subgraph Query Flow
-        F[HTML Frontend] -->|question + matter filter| G[Amazon API Gateway]
-        G --> H[Query Lambda]
-        H -->|RetrieveAndGenerate| D
-        D --> I[Amazon Bedrock Claude]
-        I -->|Answer + Source Citations| F
+        F[Lawyer types question] -->|question + matter filter| G[HTML Frontend]
+        G -->|API request| H[Amazon API Gateway]
+        H --> I[Query Lambda]
+        I -->|RetrieveAndGenerate| D
+        D --> J[Amazon Bedrock Claude]
+        J -->|Answer + Source Citations| G
+        G --> K[Lawyer sees answer]
     end
 ```
 
