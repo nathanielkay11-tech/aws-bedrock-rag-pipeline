@@ -114,3 +114,48 @@ source verification is a professional requirement.
 Lambda extracts and formats both the answer text and citation 
 metadata — document name, page reference, and relevant chunk — 
 before returning to API Gateway.
+
+---
+
+## ADR-007: S3 Folder Structure as Metadata Convention
+**Date:** 05 May 2026
+**Decision:** Use S3 folder path as the metadata convention for 
+document organisation rather than filename conventions or 
+companion JSON files.
+**Reason:** Lawyers should not be required to follow complex 
+naming conventions or upload additional metadata files alongside 
+documents. An S3 folder structure — `matters/matter-name/document-type/filename.pdf` 
+— is intuitive, requires no technical knowledge, and automatically 
+provides matter ID and document type metadata that the ingestion 
+Lambda can extract from the path without any additional input 
+from the user.
+**Alternatives considered:** Filename convention — error-prone 
+and requires user training. Companion JSON metadata file — 
+adds friction to every upload. Both rejected in favour of 
+folder structure which lawyers already understand from 
+existing file management habits.
+**Outcome:** Ingestion Lambda extracts matter ID and document 
+type from S3 object key path. Documents automatically tagged 
+with correct metadata on ingestion without user intervention.
+
+---
+
+## ADR-008: Phase 1 Targets Standalone Small to Mid-Size Firms
+**Date:** 05 May 2026
+**Decision:** Phase 1 targets small to mid-size law firms 
+without existing Document Management Systems. Enterprise 
+DMS integration deferred to Phase 2.
+**Reason:** Small to mid-size firms without iManage or 
+NetDocuments infrastructure represent an immediately 
+addressable market that can adopt this system without 
+integration complexity. Building DMS integration into 
+Phase 1 would significantly expand scope without changing 
+the core RAG architecture. The standalone upload pattern 
+is production grade for this target segment.
+**Phase 2:** Enterprise integration layer connecting to 
+iManage and NetDocuments — documents flow automatically 
+from existing DMS into S3 with metadata already attached 
+from the source system. See `docs/phase-two-additions.md`.
+**Outcome:** Phase 1 delivers a complete standalone RAG 
+system for small to mid-size firms. Phase 2 roadmap 
+documented separately.

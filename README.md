@@ -168,6 +168,14 @@ graph LR
 
 ---
 
+## 🗺️ Roadmap
+Phase 2 additions including enterprise DMS integration, 
+role-based access control, query audit trail, and 
+multi-language support are documented in 
+[`docs/phase-two-additions.md`](./docs/phase-two-additions.md).
+
+---
+
 ## 🎬 Demo Video
 
 *Coming in Iteration 2*
