@@ -75,3 +75,42 @@ consideration if query complexity increases.
 **Outcome:** Single Lambda function with direct Bedrock 
 RetrieveAndGenerate API call. Response includes answer text 
 and source citations returned to API Gateway.
+
+---
+
+## ADR-005: Automated Ingestion via Dedicated Lambda Over Manual Sync
+**Date:** 05 May 2026
+**Decision:** Implement a dedicated ingestion Lambda triggered by 
+S3 events to automatically sync new documents into the Bedrock 
+Knowledge Base.
+**Reason:** A business would not manually trigger an ingestion job 
+every time a document is added. Users uploading contracts expect 
+them to be immediately queryable without any manual intervention. 
+Automated ingestion is the production standard — the moment a PDF 
+lands in S3, Bedrock starts indexing it without human involvement.
+**Alternatives considered:** Manual ingestion via CLI or console — 
+acceptable for a demo but not viable in any production environment 
+where multiple users are uploading documents.
+**Outcome:** Separate ingestion Lambda function triggered by 
+S3 ObjectCreated events, distinct from the query handler Lambda. 
+Single responsibility — one Lambda ingests, one Lambda queries.
+
+---
+
+## ADR-006: Query Response Includes Answer and Source Citations
+**Date:** 05 May 2026
+**Decision:** The query Lambda returns both the generated answer 
+and the source citations referencing the specific document, clause, 
+and page number the answer was drawn from.
+**Reason:** Legal professionals cannot act on an unverifiable answer. 
+A lawyer needs to know exactly which contract, which clause, and 
+which page the answer came from — both to verify accuracy and to 
+cite the source in their own work. An answer without citations has 
+no professional utility in a legal context.
+**Alternatives considered:** Answer only — faster response, simpler 
+implementation, but unusable in a legal professional context where 
+source verification is a professional requirement.
+**Outcome:** Bedrock RetrieveAndGenerate returns citations natively. 
+Lambda extracts and formats both the answer text and citation 
+metadata — document name, page reference, and relevant chunk — 
+before returning to API Gateway.

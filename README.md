@@ -150,13 +150,14 @@ rather than retrieval.
 ```mermaid
 graph LR
     A[Legal Contract PDFs] --> B[Amazon S3]
-    B --> C[Bedrock Knowledge Base]
-    C --> D[OpenSearch Serverless]
-    E[User Query] --> F[Amazon API Gateway]
-    F --> G[AWS Lambda]
-    G --> C
-    C --> H[Amazon Bedrock Claude]
-    H --> I[Answer + Source Citations]
+    B -->|S3 ObjectCreated event| C[Ingestion Lambda]
+    C -->|start_ingestion_job| D[Bedrock Knowledge Base]
+    D --> E[OpenSearch Serverless]
+    F[User Query] --> G[Amazon API Gateway]
+    G --> H[Query Lambda]
+    H -->|RetrieveAndGenerate| D
+    D --> I[Amazon Bedrock Claude]
+    I --> J[Answer + Source Citations]
 ```
 
 ---
