@@ -178,3 +178,23 @@ on every invocation with no meaningful benefit.
 **Outcome:** Knowledge Base ID injected as Lambda environment 
 variable by Terraform at deploy time. No runtime API calls 
 required to resolve the ID.
+
+---
+
+## ADR-010: Simple HTML Frontend Included in Phase 1
+**Date:** 05 May 2026
+**Decision:** A simple single-page HTML frontend is included 
+in Phase 1 scope as a local file.
+**Reason:** Without a UI the project cannot be demoed 
+effectively. A JSON response in Postman does not demonstrate 
+business value to a non-technical audience. A clean interface 
+showing a lawyer typing a question and receiving an answer 
+with source citations is essential for the demo video and 
+for communicating value to interviewers and potential clients.
+**Implementation:** Single self-contained HTML file making 
+direct calls to the API Gateway endpoint. No framework 
+required. Runs locally for demo purposes.
+**Phase 2:** Host via S3 static website with CloudFront 
+distribution for production deployment and public access.
+**Outcome:** Demo-ready frontend included in Phase 1. 
+Production hosting deferred to Phase 2.

@@ -151,13 +151,14 @@ rather than retrieval.
 graph LR
     A[Lawyer uploads PDF] -->|matters/matter-name/doc-type/file.pdf| B[Amazon S3]
     B -->|S3 ObjectCreated event| C[Ingestion Lambda]
-    C -->|Extracts metadata from folder path| D[Bedrock Knowledge Base]
+    C -->|start_ingestion_job| D[Bedrock Knowledge Base]
     D <--> E[OpenSearch Serverless\nvector store]
-    F[Lawyer query + matter filter] --> G[Amazon API Gateway]
+    F[HTML Frontend] -->|question + matter filter| G[Amazon API Gateway]
     G --> H[Query Lambda]
     H -->|RetrieveAndGenerate + metadata filter| D
     D --> I[Amazon Bedrock Claude]
     I --> J[Answer + Source Citations]
+    J --> F
 ```
 
 ---
