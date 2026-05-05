@@ -181,20 +181,26 @@ required to resolve the ID.
 
 ---
 
-## ADR-010: Simple HTML Frontend Included in Phase 1
+## ADR-010: HTML Frontend Covers Both Upload and Query Flows
 **Date:** 05 May 2026
-**Decision:** A simple single-page HTML frontend is included 
-in Phase 1 scope as a local file.
+**Decision:** A single HTML frontend is included in Phase 1 
+scope covering both document upload and query interaction.
 **Reason:** Without a UI the project cannot be demoed 
-effectively. A JSON response in Postman does not demonstrate 
-business value to a non-technical audience. A clean interface 
-showing a lawyer typing a question and receiving an answer 
-with source citations is essential for the demo video and 
-for communicating value to interviewers and potential clients.
-**Implementation:** Single self-contained HTML file making 
-direct calls to the API Gateway endpoint. No framework 
-required. Runs locally for demo purposes.
+effectively. The demo must show the complete end-to-end 
+story — a lawyer uploading a contract and a lawyer querying 
+it — not just one half. A JSON response in Postman does not 
+demonstrate business value. The frontend has two distinct 
+views: an upload tab where a lawyer selects a PDF, inputs 
+matter ID and document type, and uploads via pre-signed S3 
+URL; and a query tab where a lawyer types a question, 
+optionally filters by matter, and receives an answer with 
+source citations.
+**Implementation:** Single self-contained HTML file with 
+two tabs. Upload tab generates a pre-signed S3 URL via 
+API Gateway and uploads directly to S3 from the browser. 
+Query tab calls the query Lambda via API Gateway and 
+displays the answer and citations. Runs locally for demo.
 **Phase 2:** Host via S3 static website with CloudFront 
 distribution for production deployment and public access.
-**Outcome:** Demo-ready frontend included in Phase 1. 
-Production hosting deferred to Phase 2.
+**Outcome:** Demo-ready frontend covering both upload and 
+query flows included in Phase 1.
