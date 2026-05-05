@@ -148,17 +148,21 @@ rather than retrieval.
 ## 🏗️ Architecture Overview
 
 ```mermaid
-graph LR
-    A[Lawyer uploads PDF] -->|matters/matter-name/doc-type/file.pdf| B[Amazon S3]
-    B -->|S3 ObjectCreated event| C[Ingestion Lambda]
-    C -->|start_ingestion_job| D[Bedrock Knowledge Base]
-    D <--> E[OpenSearch Serverless\nvector store]
-    F[HTML Frontend] -->|question + matter filter| G[Amazon API Gateway]
-    G --> H[Query Lambda]
-    H -->|RetrieveAndGenerate + metadata filter| D
-    D --> I[Amazon Bedrock Claude]
-    I --> J[Answer + Source Citations]
-    J --> F
+graph TD
+    subgraph Upload Flow
+        A[Lawyer uploads PDF] -->|matters/matter-id/doc-type/file.pdf| B[Amazon S3]
+        B -->|S3 ObjectCreated event| C[Ingestion Lambda]
+        C -->|start_ingestion_job| D[Bedrock Knowledge Base]
+        D <--> E[OpenSearch Serverless]
+    end
+
+    subgraph Query Flow
+        F[HTML Frontend] -->|question + matter filter| G[Amazon API Gateway]
+        G --> H[Query Lambda]
+        H -->|RetrieveAndGenerate| D
+        D --> I[Amazon Bedrock Claude]
+        I -->|Answer + Source Citations| F
+    end
 ```
 
 ---
