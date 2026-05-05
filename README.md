@@ -149,21 +149,22 @@ rather than retrieval.
 
 ```mermaid
 graph TD
-    subgraph Upload Flow
-        A[Lawyer uploads PDF] -->|matters/matter-id/doc-type/file.pdf| B[Amazon S3]
-        B -->|S3 ObjectCreated event| C[Ingestion Lambda]
-        C -->|start_ingestion_job| D[Bedrock Knowledge Base]
-        D <--> E[OpenSearch Serverless]
+    UI[HTML Frontend]
+
+    UI -->|Lawyer uploads PDF| UF
+    UI -->|Lawyer types question| QF
+
+    subgraph UF[Upload Flow]
+        U1[Amazon S3] -->|ObjectCreated event| U2[Ingestion Lambda]
+        U2 -->|start_ingestion_job| U3[Bedrock Knowledge Base]
+        U3 <-->|Store embeddings| U4[OpenSearch Serverless]
     end
 
-    subgraph Query Flow
-        F[Lawyer types question] -->|question + matter filter| G[HTML Frontend]
-        G -->|API request| H[Amazon API Gateway]
-        H --> I[Query Lambda]
-        I -->|RetrieveAndGenerate| D
-        D --> J[Amazon Bedrock Claude]
-        J -->|Answer + Source Citations| G
-        G --> K[Lawyer sees answer]
+    subgraph QF[Query Flow]
+        Q1[Amazon API Gateway] --> Q2[Query Lambda]
+        Q2 -->|RetrieveAndGenerate| U3
+        U3 --> Q3[Amazon Bedrock Claude]
+        Q3 -->|Answer + Source Citations| UI
     end
 ```
 
