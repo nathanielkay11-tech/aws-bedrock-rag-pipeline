@@ -164,8 +164,9 @@ graph TD
         direction TD
         B1[Amazon API Gateway]
         B2[Query Lambda]
+        B3[Amazon Bedrock Claude]
         B4[Answer + Source Citations]
-        B1 --> B2 -->|RetrieveAndGenerate| A3 --> B4
+        B1 --> B2 --> B3 --> B4
     end
 
     UI -->|Lawyer uploads PDF| A1
