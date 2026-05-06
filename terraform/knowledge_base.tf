@@ -2,6 +2,10 @@ resource "aws_bedrockagent_knowledge_base" "legal" {
   name     = var.knowledge_base_name
   role_arn = aws_iam_role.bedrock_kb.arn
 
+  # Bedrock validates the role's permissions at creation time; the inline policy
+  # must be fully attached before this resource is created or it fails with access denied.
+  depends_on = [aws_iam_role_policy.bedrock_kb]
+
   knowledge_base_configuration {
     type = "VECTOR"
     vector_knowledge_base_configuration {

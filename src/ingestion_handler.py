@@ -17,7 +17,8 @@ DATA_SOURCE_ID = os.environ["DATA_SOURCE_ID"]
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".docx", ".doc"}
 
-bedrock_agent = boto3.client("bedrock-agent")
+_REGION = os.environ.get("AWS_REGION", "eu-west-1")
+bedrock_agent = boto3.client("bedrock-agent", region_name=_REGION)
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +38,10 @@ def _parse_matter_metadata(key: str) -> dict:
         raise ValueError(
             f"Unexpected key structure '{key}'. "
             "Expected: matters/<matter_id>/<document_type>/<filename>"
+        )
+    if not parts[1] or not parts[2]:
+        raise ValueError(
+            f"Key '{key}' contains empty path segments — matter_id and document_type must not be blank."
         )
     return {
         "matter_id": parts[1],
@@ -64,7 +69,8 @@ def _assert_supported(filename: str) -> None:
 # than failing, because the in-flight job will pick up the new document.
 # ---------------------------------------------------------------------------
 def _start_ingestion_job(matter_id: str, filename: str) -> str | None:
-    description = f"Triggered by upload: matter={matter_id} file={filename}"
+    # Bedrock StartIngestionJob description is capped at 200 characters
+    description = f"Triggered by upload: matter={matter_id} file={filename}"[:200]
     try:
         response = bedrock_agent.start_ingestion_job(
             knowledgeBaseId=KNOWLEDGE_BASE_ID,
@@ -105,6 +111,14 @@ def lambda_handler(event: dict, context) -> dict:
         logger.info("Processing s3://%s/%s (%d bytes)", bucket, key, size)
 
         # ------------------------------------------------------------------
+        # Skip zero-byte objects — they carry no content for Bedrock to index
+        # ------------------------------------------------------------------
+        if size == 0:
+            logger.warning("Skipping zero-byte object: %s", key)
+            results.append({"key": key, "status": "skipped", "reason": "zero-byte file"})
+            continue
+
+        # ------------------------------------------------------------------
         # Parse matter metadata embedded in the key path
         # ------------------------------------------------------------------
         try:
@@ -132,9 +146,15 @@ def lambda_handler(event: dict, context) -> dict:
             continue
 
         # ------------------------------------------------------------------
-        # Trigger Bedrock Knowledge Base ingestion
+        # Trigger Bedrock Knowledge Base ingestion.
+        # Catch ClientError here so one failed record does not abort the batch.
         # ------------------------------------------------------------------
-        job_id = _start_ingestion_job(metadata["matter_id"], metadata["filename"])
+        try:
+            job_id = _start_ingestion_job(metadata["matter_id"], metadata["filename"])
+        except ClientError as exc:
+            logger.error("Failed to start ingestion job for '%s': %s", key, exc)
+            results.append({"key": key, "status": "error", "reason": str(exc)})
+            continue
 
         results.append(
             {
