@@ -177,17 +177,21 @@ graph TD
 
 ## 🚀 Project Status
 
-🔄 Iteration 1 in progress — architecture design and ADRs
+✅ Iteration 1 complete — architecture design and ADRs (ADR-001 through ADR-011)
 
----
+🔄 Iteration 2 in progress — infrastructure build complete, deployment and testing pending
 
-## 🗺️ Roadmap
-Phase 2 additions including enterprise DMS integration, 
-role-based access control, query audit trail, and 
-multi-language support are documented in 
-[`docs/phase-two-additions.md`](./docs/phase-two-additions.md).
+**Built:**
+- Full Terraform infrastructure — S3, OpenSearch Serverless, Bedrock Knowledge Base, Lambda, API Gateway
+- Ingestion Lambda — automated document ingestion with metadata extraction
+- Query Lambda — RetrieveAndGenerate with optional matter filter and source citations
+- HTML Frontend — Vandermeer & Associates Document Intelligence Platform
 
----
+**Pending:**
+- Deployment and end-to-end testing
+- Demo video
+- Cost analysis update with real deployment figures
+
 
 ## 🎬 Demo Video
 
