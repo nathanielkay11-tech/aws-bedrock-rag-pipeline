@@ -203,7 +203,23 @@ multi-language support are documented in
 
 ## ⚠️ Known Limitations
 
-*To be documented as the build progresses*
+The following limitations apply to Phase 1. Full details and 
+Phase 2 solutions are documented in 
+[`docs/phase-two-additions.md`](./docs/phase-two-additions.md).
+
+- **Ethical Walls** — no access control. All users can query 
+  all documents. Phase 1 suitable for firms where all staff 
+  access all matters only. See Phase 2B.
+- **GDPR** — partial compliance. Encryption at rest and private 
+  access implemented. Data subject rights and formal DPAs not 
+  included. See Phase 2D.
+- **Document Retention** — not enforced. No S3 lifecycle policy 
+  preventing deletion within legal retention periods. See Phase 2E.
+- **Audit Trail** — not implemented. No query logging. Not 
+  suitable for firms with compliance or billing requirements. 
+  See Phase 2C.
+- **Frontend** — runs locally only. Not suitable for multi-user 
+  production deployment without Phase 2 CloudFront hosting.
 
 ---
 
