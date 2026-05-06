@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vandermeer &amp; Associates — Document Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:          #0a0a11;
+      --bg-surface:       #101019;
+      --bg-elevated:      #161620;
+      --bg-input:         #0d0d17;
+      --border:           #1f1f30;
+      --border-subtle:    #181825;
+      --accent:           #c8a96e;
+      --accent-light:     #dfc08e;
+      --accent-dim:       rgba(200, 169, 110, 0.09);
+      --accent-glow:      rgba(200, 169, 110, 0.14);
+      --text-primary:     #ddddf0;
+      --text-secondary:   #7878a0;
+      --text-muted:       #3f3f58;
+      --success:          #5ab87a;
+      --success-bg:       rgba(90, 184, 122, 0.07);
+      --success-border:   rgba(90, 184, 122, 0.22);
+      --error:            #c85858;
+      --error-bg:         rgba(200, 88, 88, 0.07);
+      --error-border:     rgba(200, 88, 88, 0.22);
+      --radius-sm:        6px;
+      --radius:           10px;
+      --radius-lg:        13px;
+      --transition:       0.16s ease;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-rule {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #8a6030 10%, #c8a96e 40%, #dfc08e 50%, #c8a96e 60%, #8a6030 90%, transparent);
+    }
+
+    .header-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 36px;
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(200, 169, 110, 0.35);
+      border-radius: var(--radius-sm);
+      background: var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+      color: var(--text-primary);
+      line-height: 1.15;
+    }
+
+    .brand-sub {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 400;
+    }
+
+    .kb-indicator {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .indicator-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 7px var(--success);
+    }
+
+    /* ── Main layout ─────────────────────────────────────────── */
+
+    main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 36px 36px 64px;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    /* ── Panel ───────────────────────────────────────────────── */
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 22px 26px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-header-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 3px;
+    }
+
+    .panel-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-dim);
+      border: 1px solid rgba(200, 169, 110, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .panel-subtitle {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      padding-left: 41px;
+    }
+
+    .panel-body {
+      padding: 24px 26px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .panel-body .btn {
+      margin-top: auto;
+    }
+
+    /* Empty placeholder divs must not consume gap space or shift the button */
+    #upload-status:empty,
+    #query-status:empty,
+    #results-area:empty {
+      display: none;
+    }
+
+    /* ── Form fields ─────────────────────────────────────────── */
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .required {
+      color: var(--accent);
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    textarea {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      padding: 10px 13px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      width: 100%;
+    }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    input[type="text"]:hover,
+    textarea:hover {
+      border-color: #2a2a40;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 96px;
+      line-height: 1.65;
+    }
+
+    .field-hint {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ── File drop zone ──────────────────────────────────────── */
+
+    .drop-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 26px 16px 22px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      background: var(--bg-input);
+      position: relative;
+      user-select: none;
+    }
+
+    .drop-zone:hover {
+      border-color: #2e2e48;
+      background: #0f0f1a;
+    }
+
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .drop-zone.has-file {
+      border-style: solid;
+      border-color: rgba(200, 169, 110, 0.45);
+      background: var(--accent-dim);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 26px;
+      line-height: 1;
+      margin-bottom: 9px;
+    }
+
+    .drop-label {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .drop-label em {
+      color: var(--accent);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    .file-name-display {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      word-break: break-all;
+      transition: color var(--transition);
+    }
+
+    .file-name-display.selected {
+      color: var(--accent-light);
+      font-weight: 500;
+    }
+
+    .format-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .format-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .chip {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    /* ── Button ──────────────────────────────────────────────── */
+
+    .btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      border: none;
+      transition: background var(--transition), box-shadow var(--transition), transform var(--transition), opacity var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a11;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-light);
+      box-shadow: 0 4px 22px var(--accent-glow);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+
+    .spinner {
+      width: 13px;
+      height: 13px;
+      border: 2px solid rgba(10, 10, 17, 0.25);
+      border-top-color: #0a0a11;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Status messages ─────────────────────────────────────── */
+
+    .status-msg {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      line-height: 1.5;
+      animation: fade-up 0.18s ease;
+    }
+
+    .status-msg.success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success);
+    }
+
+    .status-msg.error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error);
+    }
+
+    .status-icon { flex-shrink: 0; font-weight: 600; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Results ─────────────────────────────────────────────── */
+
+    .results-area {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: fade-up 0.22s ease;
+    }
+
+    .result-block {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .result-block-header {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .block-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .block-count {
+      margin-left: auto;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    .answer-body {
+      padding: 18px 18px;
+      font-size: 13.5px;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+
+    .citations-list {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .citation-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .citation-meta {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .citation-filename {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.01em;
+    }
+
+    .citation-tag {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .citation-excerpt {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .no-citations {
+      padding: 12px 16px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 18px 36px;
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-rule"></div>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">⚖</div>
+      <div>
+        <div class="brand-name">Vandermeer &amp; Associates</div>
+        <div class="brand-sub">Document Intelligence Platform</div>
+      </div>
+    </div>
+    <div class="kb-indicator">
+      <div class="indicator-dot"></div>
+      <span>Knowledge Base Active</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="panel-grid">
+
+    <!-- ══════════════════ LEFT — UPLOAD ══════════════════ -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-header-row">
+          <div class="panel-icon">📁</div>
+          <h2 class="panel-title">Upload Documents</h2>
+        </div>
+        <p class="panel-subtitle">Add legal documents to the knowledge base</p>
+      </div>
+
+      <div class="panel-body">
+
+        <div class="field">
+          <label for="upload-matter-id">Matter ID <span class="required">*</span></label>
+          <input type="text" id="upload-matter-id" placeholder="e.g. ABC-2024-001"
+                 autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="field">
+          <label>Document <span class="required">*</span></label>
+          <div class="drop-zone" id="drop-zone" role="button" aria-label="File upload area">
+            <input type="file" id="file-input" accept=".pdf,.txt,.docx,.doc"
+                   aria-label="Select a document to upload">
+            <div class="drop-icon">📄</div>
+            <p class="drop-label">Drag &amp; drop or <em>browse</em></p>
+            <p class="file-name-display" id="file-name-display">No file selected</p>
+          </div>
+          <div class="format-row">
+            <span class="format-label">Supported formats</span>
+            <span class="chip">PDF</span>
+            <span class="chip">TXT</span>
+            <span class="chip">DOCX</span>
+            <span class="chip">DOC</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="upload-btn" onclick="handleUpload()" style="margin-top: auto">
+          Upload Document
+        </button>
+
+        <div id="upload-status"></div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════ RIGHT — QUERY ══════════════════ -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-header-row">
+          <div class="panel-icon">🔍</div>
+          <h2 class="panel-title">Query Documents</h2>
+        </div>
+        <p class="panel-subtitle">Ask questions about your legal documents</p>
+      </div>
+
+      <div class="panel-body">
+
+        <div class="field">
+          <label for="question">Question <span class="required">*</span></label>
+          <textarea id="question" rows="4"
+                    placeholder="e.g. What are the termination clauses in this agreement?"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="query-matter-id">Matter ID Filter</label>
+          <input type="text" id="query-matter-id" placeholder="e.g. ABC-2024-001"
+                 autocomplete="off" spellcheck="false">
+          <p class="field-hint">Leave blank to search all documents</p>
+        </div>
+
+        <button class="btn btn-primary" id="query-btn" onclick="handleQuery()" style="margin-top: auto">
+          Submit Query
+        </button>
+
+        <div id="query-status"></div>
+        <div id="results-area"></div>
+
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <span>Vandermeer &amp; Associates &mdash; Confidential &amp; Privileged</span>
+  <span>Powered by AWS Bedrock Knowledge Base</span>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Configuration — replace API_BASE_URL with your API Gateway invoke URL.
+// Do not include a trailing slash.
+// ─────────────────────────────────────────────────────────────────────────────
+const CONFIG = {
+  API_BASE_URL: 'https://your-api-id.execute-api.eu-west-1.amazonaws.com/prod',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// File selection — handles both click-to-browse and drag-and-drop
+// ─────────────────────────────────────────────────────────────────────────────
+const dropZone       = document.getElementById('drop-zone');
+const fileInput      = document.getElementById('file-input');
+const fileNameDisplay = document.getElementById('file-name-display');
+
+const ALLOWED_EXTENSIONS = new Set(['.pdf', '.txt', '.docx', '.doc']);
+
+let selectedFile = null;
+
+function applyFileSelection(file) {
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (!ALLOWED_EXTENSIONS.has(ext)) {
+    showStatus('upload-status', 'error',
+      `"${file.name}" is not a supported format. Please upload a PDF, TXT, DOCX, or DOC file.`);
+    return;
+  }
+  selectedFile = file;
+  fileNameDisplay.textContent = file.name;
+  fileNameDisplay.classList.add('selected');
+  dropZone.classList.add('has-file');
+  document.getElementById('upload-status').innerHTML = '';
+}
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) applyFileSelection(fileInput.files[0]);
+});
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+
+['dragleave', 'dragend'].forEach((ev) => {
+  dropZone.addEventListener(ev, () => dropZone.classList.remove('drag-over'));
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) applyFileSelection(e.dataTransfer.files[0]);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Upload handler — validates inputs and POSTs file + matter ID to /upload
+// ─────────────────────────────────────────────────────────────────────────────
+async function handleUpload() {
+  const matterId = document.getElementById('upload-matter-id').value.trim();
+  const btn = document.getElementById('upload-btn');
+
+  if (!matterId) {
+    showStatus('upload-status', 'error', 'Matter ID is required.');
+    document.getElementById('upload-matter-id').focus();
+    return;
+  }
+  if (!selectedFile) {
+    showStatus('upload-status', 'error', 'Please select a document to upload.');
+    return;
+  }
+
+  setButtonLoading(btn, true, 'Uploading…');
+
+  try {
+    const body = new FormData();
+    body.append('matter_id', matterId);
+    body.append('file', selectedFile, selectedFile.name);
+
+    const res = await fetch(`${CONFIG.API_BASE_URL}/upload`, { method: 'POST', body });
+
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({}));
+      throw new Error(payload.error || `Upload failed (HTTP ${res.status})`);
+    }
+
+    showStatus('upload-status', 'success',
+      `"${selectedFile.name}" uploaded successfully to matter ${matterId}. ` +
+      'Ingestion into the knowledge base will complete shortly.');
+
+    // Reset file picker
+    selectedFile = null;
+    fileInput.value = '';
+    fileNameDisplay.textContent = 'No file selected';
+    fileNameDisplay.classList.remove('selected');
+    dropZone.classList.remove('has-file');
+
+  } catch (err) {
+    showStatus('upload-status', 'error', err.message || 'Upload failed. Please try again.');
+  } finally {
+    setButtonLoading(btn, false, 'Upload Document');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Query handler — validates inputs, POSTs to /query, renders answer + citations
+// ─────────────────────────────────────────────────────────────────────────────
+async function handleQuery() {
+  const question = document.getElementById('question').value.trim();
+  const matterId = document.getElementById('query-matter-id').value.trim() || null;
+  const btn = document.getElementById('query-btn');
+
+  if (!question) {
+    showStatus('query-status', 'error', 'Please enter a question.');
+    document.getElementById('question').focus();
+    return;
+  }
+
+  document.getElementById('query-status').innerHTML = '';
+  document.getElementById('results-area').innerHTML = '';
+  setButtonLoading(btn, true, 'Searching…');
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, matter_id: matterId }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 429)
+        throw new Error('Rate limit reached — please wait a moment and try again.');
+      throw new Error(data.error || `Request failed (HTTP ${res.status})`);
+    }
+
+    renderResults(data);
+
+  } catch (err) {
+    showStatus('query-status', 'error', err.message || 'Query failed. Please try again.');
+  } finally {
+    setButtonLoading(btn, false, 'Submit Query');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Results renderer — builds answer block and citation cards from API response
+// ─────────────────────────────────────────────────────────────────────────────
+function renderResults({ answer = '', citations = [] }) {
+  const citationsHtml = citations.length
+    ? citations.map((c) => {
+        const filename    = c.source_uri ? c.source_uri.split('/').pop() : 'Unknown source';
+        const matterTag   = c.matter_id    ? `<span class="citation-tag">Matter: ${esc(c.matter_id)}</span>` : '';
+        const typeTag     = c.document_type ? `<span class="citation-tag">${esc(c.document_type)}</span>` : '';
+        const excerptHtml = c.excerpt
+          ? `<p class="citation-excerpt">${esc(c.excerpt)}</p>` : '';
+        return `
+          <div class="citation-card">
+            <div class="citation-meta">
+              <span class="citation-filename">${esc(filename)}</span>
+              ${matterTag}${typeTag}
+            </div>
+            ${excerptHtml}
+          </div>`;
+      }).join('')
+    : `<p class="no-citations">No source citations were returned for this query.</p>`;
+
+  const countLabel = citations.length
+    ? `${citations.length} source${citations.length !== 1 ? 's' : ''}` : '';
+
+  document.getElementById('results-area').innerHTML = `
+    <div class="results-area">
+      <div class="result-block">
+        <div class="result-block-header">
+          <div class="block-dot"></div>Answer
+        </div>
+        <div class="answer-body">${formatAnswer(answer)}</div>
+      </div>
+      <div class="result-block">
+        <div class="result-block-header">
+          <div class="block-dot"></div>Source Citations
+          <span class="block-count">${esc(countLabel)}</span>
+        </div>
+        <div class="citations-list">${citationsHtml}</div>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utilities
+// ─────────────────────────────────────────────────────────────────────────────
+function showStatus(id, type, message) {
+  const icon = type === 'success' ? '✓' : '✕';
+  document.getElementById(id).innerHTML =
+    `<div class="status-msg ${type}">` +
+    `<span class="status-icon">${icon}</span>` +
+    `<span>${esc(message)}</span>` +
+    `</div>`;
+}
+
+function setButtonLoading(btn, loading, label) {
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? `<div class="spinner"></div>${esc(label)}`
+    : label;
+}
+
+// Escape user-facing strings before inserting into innerHTML
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Preserve line breaks in the answer body
+function formatAnswer(str) {
+  return esc(str).replace(/\n/g, '<br>');
+}
+
+// Cmd/Ctrl + Enter submits the query from the textarea
+document.getElementById('question').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleQuery();
+});
+</script>
+
+</body>
+</html>
