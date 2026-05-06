@@ -204,3 +204,30 @@ displays the answer and citations. Runs locally for demo.
 distribution for production deployment and public access.
 **Outcome:** Demo-ready frontend covering both upload and 
 query flows included in Phase 1.
+
+---
+
+## ADR-011: matter_id Filter Optional in Phase 1
+**Date:** 06 May 2026
+**Decision:** matter_id filter is optional in the query handler. 
+Queries without a filter search across all available documents.
+**Reason:** The primary value of this system is enabling lawyers 
+to search across all documents they have access to without knowing 
+in advance where the answer lives. Mandatory matter filtering 
+defeats this purpose — it requires the lawyer to already know 
+which matter contains the answer. Optional filtering allows 
+lawyers to narrow results when needed while preserving 
+cross-matter search as the default use case.
+**Compliance note:** Phase 1 assumes all users are permitted 
+to access all documents. This is appropriate for small firms 
+where all staff work across all matters. Firms with ethical 
+wall requirements must implement Phase 2B before production use.
+**Phase 2B:** Cognito authentication assigns matter-level 
+permissions to individual lawyer accounts. Uploaded documents 
+are tagged to specific matters and lawyers. Queries 
+automatically filter to permitted matters only — no manual 
+filter required. Ethical wall compliance enforced at the 
+account level, not the query level.
+**Outcome:** matter_id is an optional query parameter. 
+Unfiltered queries search all documents. Phase 2B delivers 
+full ethical wall compliance via Cognito.

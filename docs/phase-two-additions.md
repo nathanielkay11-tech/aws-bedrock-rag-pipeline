@@ -33,28 +33,43 @@ legal departments running iManage or NetDocuments at scale.
 
 ---
 
-## Phase 2B: Role-Based Access Control
+## Phase 2B: Ethical Walls and Matter-Level Access Control
 
 **What it is:**
-Cognito-backed authentication ensuring lawyers only query 
-documents from matters they are assigned to.
+Cognito-backed authentication enforcing ethical wall compliance 
+at the account level. Each lawyer has an account with 
+matter-level permissions assigned by a firm administrator. 
+When documents are uploaded they are tagged to specific matters 
+and assigned to permitted users. Queries automatically filter 
+to the lawyer's permitted matters — no manual filter required.
 
 **Why it's deferred:**
-Phase 1 assumes a trusted internal user base within a single 
-firm. Access control adds significant complexity — Cognito 
-user pools, JWT validation in Lambda, matter-level permission 
-tables in DynamoDB — without changing the core RAG capability.
+Phase 1 assumes a trusted internal user base where all staff 
+are permitted to access all matters. Ethical wall enforcement 
+requires authentication infrastructure — Cognito user pools, 
+JWT validation, matter permission tables — that significantly 
+expands scope beyond the core RAG capability.
+
+**Legal context:**
+Ethical walls are a professional and ethical requirement under 
+bar association rules in most jurisdictions. Breaching an 
+ethical wall can result in attorney discipline, fee forfeiture, 
+and firm disqualification from representing clients. Phase 1 
+is only suitable for firms where no ethical wall requirements 
+exist.
 
 **What Phase 2B involves:**
 - AWS Cognito user pool for lawyer authentication
-- Matter-level permission table in DynamoDB — maps user to 
-  permitted matter IDs
-- Query Lambda validates JWT token and filters knowledge base 
-  query to permitted matters only
-- Admin interface for matter assignment management
+- Matter permission table in DynamoDB — maps lawyer account 
+  to permitted matter IDs
+- Document upload tags matter ID to permitted users at 
+  ingestion time
+- Query Lambda validates JWT token and automatically applies 
+  matter-level filter — lawyer never needs to type a matter ID
+- Admin interface for matter assignment and ethical wall management
 
-**Target market:** Any firm handling sensitive multi-client 
-matters where information barrier requirements apply.
+**Target market:** Any firm handling matters where conflicts 
+of interest exist or where regulatory ethical wall requirements apply.
 
 ---
 
@@ -105,3 +120,31 @@ for non-English text and query language detection logic.
 
 **Target market:** European law firms handling cross-border 
 matters — directly relevant to Netherlands market.
+
+---
+
+## Phase 2E: Document Retention Policy
+
+**What it is:**
+S3 lifecycle policies enforcing minimum document retention 
+periods and preventing accidental deletion of client documents.
+
+**Why it's deferred:**
+Phase 1 has no retention enforcement. Acceptable for a demo 
+environment but not for production use with real client documents.
+
+**Legal context:**
+Law firms in the Netherlands are required to retain client 
+documents for a minimum of 7 years under Dutch Bar Association 
+rules. Deletion before this period constitutes a professional 
+conduct violation.
+
+**What Phase 2E involves:**
+- S3 Object Lock preventing deletion within retention period
+- S3 lifecycle policy archiving documents to Glacier after 
+  active matter closes
+- Matter closure workflow triggering retention clock
+- Legal hold capability for matters under litigation
+
+**Target market:** Any firm handling real client matters 
+in production.
