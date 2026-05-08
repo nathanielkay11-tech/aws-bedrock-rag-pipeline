@@ -25,29 +25,32 @@ bedrock_agent = boto3.client("bedrock-agent", region_name=_REGION)
 # Metadata extraction
 #
 # Expected S3 key convention:
-#   matters/<matter_id>/<document_type>/<filename>
-#   e.g. matters/ABC-2024-001/contracts/service-agreement.pdf
+#   matters/<matter_id>/<document_type>/<uploader_name>/<filename>
+#   e.g. matters/ABC-2024-001/contracts/Sophie van der Berg/service-agreement.pdf
 #
-# matter_id    — unique matter reference used for filtering and logging
+# matter_id     — unique matter reference used for filtering and logging
 # document_type — broad category (contracts, amendments, exhibits, …)
+# uploader_name — name of the person who uploaded the document
 # filename      — original document name including extension
 # ---------------------------------------------------------------------------
 def _parse_matter_metadata(key: str) -> dict:
     parts = key.split("/")
-    if len(parts) < 4 or parts[0] != "matters":
+    if len(parts) < 5 or parts[0] != "matters":
         raise ValueError(
             f"Unexpected key structure '{key}'. "
-            "Expected: matters/<matter_id>/<document_type>/<filename>"
+            "Expected: matters/<matter_id>/<document_type>/<uploader_name>/<filename>"
         )
-    if not parts[1] or not parts[2]:
+    if not parts[1] or not parts[2] or not parts[3]:
         raise ValueError(
-            f"Key '{key}' contains empty path segments — matter_id and document_type must not be blank."
+            f"Key '{key}' contains empty path segments — "
+            "matter_id, document_type and uploader_name must not be blank."
         )
     return {
         "matter_id": parts[1],
         "document_type": parts[2],
+        "uploader_name": parts[3],
         # Preserve any sub-path within the filename segment
-        "filename": "/".join(parts[3:]),
+        "filename": "/".join(parts[4:]),
     }
 
 
@@ -129,9 +132,10 @@ def lambda_handler(event: dict, context) -> dict:
             continue
 
         logger.info(
-            "Matter metadata — matter_id=%s document_type=%s filename=%s",
+            "Matter metadata — matter_id=%s document_type=%s uploader_name=%s filename=%s",
             metadata["matter_id"],
             metadata["document_type"],
+            metadata["uploader_name"],
             metadata["filename"],
         )
 
@@ -163,6 +167,7 @@ def lambda_handler(event: dict, context) -> dict:
                 "job_id": job_id,
                 "matter_id": metadata["matter_id"],
                 "document_type": metadata["document_type"],
+                "uploader_name": metadata["uploader_name"],
             }
         )
 
