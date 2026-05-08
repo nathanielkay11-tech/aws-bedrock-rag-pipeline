@@ -1,0 +1,396 @@
+{
+  "version": 4,
+  "terraform_version": "1.14.8",
+  "serial": 123,
+  "lineage": "6b5cc187-97d5-2436-0d6c-29ffab8d5b7e",
+  "outputs": {},
+  "resources": [
+    {
+      "mode": "data",
+      "type": "aws_caller_identity",
+      "name": "current",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_id": "251478237846",
+            "arn": "arn:aws:iam::251478237846:user/terraform-learn-user",
+            "id": "251478237846",
+            "user_id": "AIDATVDKFMKLF7FMOT2OY"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_bedrockagent_data_source",
+      "name": "contracts",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "data_deletion_policy": "DELETE",
+            "data_source_configuration": [
+              {
+                "confluence_configuration": [],
+                "s3_configuration": [
+                  {
+                    "bucket_arn": "arn:aws:s3:::vandermeer-legal-rag-dev-nk",
+                    "bucket_owner_account_id": null,
+                    "inclusion_prefixes": null
+                  }
+                ],
+                "salesforce_configuration": [],
+                "share_point_configuration": [],
+                "type": "S3",
+                "web_configuration": []
+              }
+            ],
+            "data_source_id": "9QP44OCPF9",
+            "description": null,
+            "id": "9QP44OCPF9,C0CPAZLLA9",
+            "knowledge_base_id": "C0CPAZLLA9",
+            "name": "legal-contracts-s3",
+            "server_side_encryption_configuration": [],
+            "timeouts": null,
+            "vector_ingestion_configuration": []
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "dependencies": [
+            "aws_bedrockagent_knowledge_base.legal",
+            "aws_iam_policy.bedrock_kb",
+            "aws_iam_role.bedrock_kb",
+            "aws_iam_role_policy_attachment.bedrock_kb",
+            "aws_s3_bucket.documents",
+            "data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_bedrockagent_knowledge_base",
+      "name": "legal",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"].no_tags",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:bedrock:eu-west-1:251478237846:knowledge-base/C0CPAZLLA9",
+            "created_at": "2026-05-08T12:40:31Z",
+            "description": null,
+            "failure_reasons": null,
+            "id": "C0CPAZLLA9",
+            "knowledge_base_configuration": [
+              {
+                "type": "VECTOR",
+                "vector_knowledge_base_configuration": [
+                  {
+                    "embedding_model_arn": "arn:aws:bedrock:eu-west-1::foundation-model/amazon.titan-embed-text-v2:0",
+                    "embedding_model_configuration": [],
+                    "supplemental_data_storage_configuration": []
+                  }
+                ]
+              }
+            ],
+            "name": "vandermeer-legal-kb",
+            "role_arn": "arn:aws:iam::251478237846:role/dev-bedrock-kb-role",
+            "storage_configuration": [
+              {
+                "opensearch_serverless_configuration": [
+                  {
+                    "collection_arn": "arn:aws:aoss:eu-west-1:251478237846:collection/hhiu3f87s5ddcodbmm13",
+                    "field_mapping": [
+                      {
+                        "metadata_field": "metadata",
+                        "text_field": "text",
+                        "vector_field": "embedding"
+                      }
+                    ],
+                    "vector_index_name": "legal-contracts-index"
+                  }
+                ],
+                "pinecone_configuration": [],
+                "rds_configuration": [],
+                "redis_enterprise_cloud_configuration": [],
+                "type": "OPENSEARCH_SERVERLESS"
+              }
+            ],
+            "tags": null,
+            "tags_all": {},
+            "timeouts": null,
+            "updated_at": "2026-05-08T12:40:31Z"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "dependencies": [
+            "aws_iam_policy.bedrock_kb",
+            "aws_iam_role.bedrock_kb",
+            "aws_iam_role_policy_attachment.bedrock_kb",
+            "aws_s3_bucket.documents",
+            "data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_policy",
+      "name": "bedrock_kb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::251478237846:policy/dev-bedrock-kb-policy",
+            "attachment_count": 1,
+            "description": "",
+            "id": "arn:aws:iam::251478237846:policy/dev-bedrock-kb-policy",
+            "name": "dev-bedrock-kb-policy",
+            "name_prefix": "",
+            "path": "/",
+            "policy": "{\"Statement\":[{\"Action\":[\"s3:GetObject\",\"s3:ListBucket\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:s3:::vandermeer-legal-rag-dev-nk\",\"arn:aws:s3:::vandermeer-legal-rag-dev-nk/*\"],\"Sid\":\"S3Read\"},{\"Action\":\"bedrock:InvokeModel\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:bedrock:eu-west-1::foundation-model/amazon.titan-embed-text-v2:0\",\"Sid\":\"BedrockEmbed\"},{\"Action\":\"aoss:APIAccessAll\",\"Effect\":\"Allow\",\"Resource\":\"arn:aws:aoss:eu-west-1:251478237846:collection/hhiu3f87s5ddcodbmm13\",\"Sid\":\"OpenSearchServerless\"}],\"Version\":\"2012-10-17\"}",
+            "policy_id": "ANPATVDKFMKLB5FQ2UK6E",
+            "tags": {},
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "bedrock-rag-legal"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_s3_bucket.documents"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "bedrock_kb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::251478237846:role/dev-bedrock-kb-role",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Condition\":{\"StringEquals\":{\"aws:SourceAccount\":\"251478237846\"}},\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"bedrock.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2026-05-08T11:07:14Z",
+            "description": "",
+            "force_detach_policies": false,
+            "id": "dev-bedrock-kb-role",
+            "inline_policy": [],
+            "managed_policy_arns": [
+              "arn:aws:iam::251478237846:policy/dev-bedrock-kb-policy"
+            ],
+            "max_session_duration": 3600,
+            "name": "dev-bedrock-kb-role",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {},
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "bedrock-rag-legal"
+            },
+            "unique_id": "AROATVDKFMKLMELQSLBHT"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy_attachment",
+      "name": "bedrock_kb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "dev-bedrock-kb-role-20260508123500517600000001",
+            "policy_arn": "arn:aws:iam::251478237846:policy/dev-bedrock-kb-policy",
+            "role": "dev-bedrock-kb-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_policy.bedrock_kb",
+            "aws_iam_role.bedrock_kb",
+            "aws_s3_bucket.documents",
+            "data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_service_linked_role",
+      "name": "aoss",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::251478237846:role/aws-service-role/observability.aoss.amazonaws.com/AWSServiceRoleForAmazonOpenSearchServerless",
+            "aws_service_name": "observability.aoss.amazonaws.com",
+            "create_date": "2026-05-08T12:26:53Z",
+            "custom_suffix": "",
+            "description": "",
+            "id": "arn:aws:iam::251478237846:role/aws-service-role/observability.aoss.amazonaws.com/AWSServiceRoleForAmazonOpenSearchServerless",
+            "name": "AWSServiceRoleForAmazonOpenSearchServerless",
+            "path": "/aws-service-role/observability.aoss.amazonaws.com/",
+            "tags": {},
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "bedrock-rag-legal"
+            },
+            "unique_id": "AROATVDKFMKLNNSRYFHBU"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "documents",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "acceleration_status": "",
+            "acl": null,
+            "arn": "arn:aws:s3:::vandermeer-legal-rag-dev-nk",
+            "bucket": "vandermeer-legal-rag-dev-nk",
+            "bucket_domain_name": "vandermeer-legal-rag-dev-nk.s3.amazonaws.com",
+            "bucket_prefix": "",
+            "bucket_regional_domain_name": "vandermeer-legal-rag-dev-nk.s3.eu-west-1.amazonaws.com",
+            "cors_rule": [
+              {
+                "allowed_headers": [
+                  "Content-Type"
+                ],
+                "allowed_methods": [
+                  "PUT"
+                ],
+                "allowed_origins": [
+                  "*"
+                ],
+                "expose_headers": [
+                  "ETag"
+                ],
+                "max_age_seconds": 3000
+              }
+            ],
+            "force_destroy": false,
+            "grant": [
+              {
+                "id": "08de60e74bb8d7a09eb82028b7ab01a3567f4db11004f709088253a2585e0d2c",
+                "permissions": [
+                  "FULL_CONTROL"
+                ],
+                "type": "CanonicalUser",
+                "uri": ""
+              }
+            ],
+            "hosted_zone_id": "Z1BKCTXD74EZPE",
+            "id": "vandermeer-legal-rag-dev-nk",
+            "lifecycle_rule": [],
+            "logging": [],
+            "object_lock_configuration": [],
+            "object_lock_enabled": false,
+            "policy": "{\"Statement\":[{\"Action\":\"s3:*\",\"Condition\":{\"Bool\":{\"aws:SecureTransport\":\"false\"}},\"Effect\":\"Deny\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::vandermeer-legal-rag-dev-nk\",\"arn:aws:s3:::vandermeer-legal-rag-dev-nk/*\"],\"Sid\":\"DenyNonHTTPS\"}],\"Version\":\"2012-10-17\"}",
+            "region": "eu-west-1",
+            "replication_configuration": [],
+            "request_payer": "BucketOwner",
+            "server_side_encryption_configuration": [
+              {
+                "rule": [
+                  {
+                    "apply_server_side_encryption_by_default": [
+                      {
+                        "kms_master_key_id": "",
+                        "sse_algorithm": "AES256"
+                      }
+                    ],
+                    "bucket_key_enabled": false
+                  }
+                ]
+              }
+            ],
+            "tags": {},
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "bedrock-rag-legal"
+            },
+            "timeouts": null,
+            "versioning": [
+              {
+                "enabled": true,
+                "mfa_delete": false
+              }
+            ],
+            "website": [],
+            "website_domain": null,
+            "website_endpoint": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjM2MDAwMDAwMDAwMDAsInJlYWQiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+        }
+      ]
+    }
+  ],
+  "check_results": [
+    {
+      "object_kind": "var",
+      "config_addr": "var.lambda_memory",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "var.environment",
+      "status": "unknown",
+      "objects": [
+        {
+          "object_addr": "var.environment",
+          "status": "unknown"
+        }
+      ]
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "var.s3_bucket_name",
+      "status": "unknown",
+      "objects": null
+    },
+    {
+      "object_kind": "var",
+      "config_addr": "var.lambda_timeout",
+      "status": "unknown",
+      "objects": null
+    }
+  ]
+}

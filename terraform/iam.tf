@@ -22,9 +22,8 @@ resource "aws_iam_role" "bedrock_kb" {
   })
 }
 
-resource "aws_iam_role_policy" "bedrock_kb" {
+resource "aws_iam_policy" "bedrock_kb" {
   name = "${var.environment}-bedrock-kb-policy"
-  role = aws_iam_role.bedrock_kb.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -48,10 +47,15 @@ resource "aws_iam_role_policy" "bedrock_kb" {
         Sid      = "OpenSearchServerless"
         Effect   = "Allow"
         Action   = "aoss:APIAccessAll"
-        Resource = aws_opensearchserverless_collection.kb.arn
+        Resource = local.collection_arn
       },
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "bedrock_kb" {
+  role       = aws_iam_role.bedrock_kb.name
+  policy_arn = aws_iam_policy.bedrock_kb.arn
 }
 
 # ---------------------------------------------------------------------------
@@ -78,9 +82,8 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy" "lambda_bedrock" {
+resource "aws_iam_policy" "lambda_bedrock" {
   name = "${var.environment}-lambda-bedrock-policy"
-  role = aws_iam_role.lambda.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -102,6 +105,11 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
       },
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_bedrock" {
+  role       = aws_iam_role.lambda.name
+  policy_arn = aws_iam_policy.lambda_bedrock.arn
 }
 
 # ---------------------------------------------------------------------------
@@ -128,9 +136,8 @@ resource "aws_iam_role_policy_attachment" "ingestion_lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy" "ingestion_lambda_bedrock" {
+resource "aws_iam_policy" "ingestion_lambda_bedrock" {
   name = "${var.environment}-ingestion-lambda-policy"
-  role = aws_iam_role.ingestion_lambda.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -146,4 +153,57 @@ resource "aws_iam_role_policy" "ingestion_lambda_bedrock" {
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "ingestion_lambda_bedrock" {
+  role       = aws_iam_role.ingestion_lambda.name
+  policy_arn = aws_iam_policy.ingestion_lambda_bedrock.arn
+}
+
+# ---------------------------------------------------------------------------
+# Presign Lambda role — only needs s3:PutObject because the URL it generates
+# is signed with these credentials; S3 validates them on the browser's PUT.
+# ---------------------------------------------------------------------------
+
+resource "aws_iam_role" "presign_lambda" {
+  name = "${var.environment}-presign-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "lambda.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# CloudWatch Logs access for the presign Lambda
+resource "aws_iam_role_policy_attachment" "presign_lambda_basic" {
+  role       = aws_iam_role.presign_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Allow the presign Lambda to sign PUT requests for any key under matters/
+resource "aws_iam_policy" "presign_lambda_s3" {
+  name = "${var.environment}-presign-lambda-s3-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "S3PresignPut"
+        Effect   = "Allow"
+        Action   = "s3:PutObject"
+        Resource = "${aws_s3_bucket.documents.arn}/matters/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "presign_lambda_s3" {
+  role       = aws_iam_role.presign_lambda.name
+  policy_arn = aws_iam_policy.presign_lambda_s3.arn
 }

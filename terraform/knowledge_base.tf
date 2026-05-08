@@ -1,10 +1,11 @@
 resource "aws_bedrockagent_knowledge_base" "legal" {
+  provider = aws.no_tags
   name     = var.knowledge_base_name
   role_arn = aws_iam_role.bedrock_kb.arn
 
   # Bedrock validates the role's permissions at creation time; the inline policy
   # must be fully attached before this resource is created or it fails with access denied.
-  depends_on = [aws_iam_role_policy.bedrock_kb]
+  depends_on = [aws_iam_role_policy_attachment.bedrock_kb]
 
   knowledge_base_configuration {
     type = "VECTOR"
@@ -16,7 +17,7 @@ resource "aws_bedrockagent_knowledge_base" "legal" {
   storage_configuration {
     type = "OPENSEARCH_SERVERLESS"
     opensearch_serverless_configuration {
-      collection_arn    = aws_opensearchserverless_collection.kb.arn
+      collection_arn    = local.collection_arn
       vector_index_name = "legal-contracts-index"
       field_mapping {
         vector_field   = "embedding"
@@ -28,8 +29,9 @@ resource "aws_bedrockagent_knowledge_base" "legal" {
 }
 
 resource "aws_bedrockagent_data_source" "contracts" {
-  name              = "legal-contracts-s3"
-  knowledge_base_id = aws_bedrockagent_knowledge_base.legal.id
+  name                 = "legal-contracts-s3"
+  knowledge_base_id    = aws_bedrockagent_knowledge_base.legal.id
+  data_deletion_policy = "RETAIN"
 
   data_source_configuration {
     type = "S3"

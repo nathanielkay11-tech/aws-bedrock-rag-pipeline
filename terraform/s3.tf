@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "documents" {
-  bucket = var.s3_bucket_name
+  bucket        = var.s3_bucket_name
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "documents" {
@@ -24,6 +25,21 @@ resource "aws_s3_bucket_public_access_block" "documents" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+# CORS configuration — required for pre-signed PUT uploads from the browser.
+# Without this, the browser's preflight OPTIONS to S3 is rejected and the
+# upload never reaches the PUT stage regardless of presigned URL validity.
+resource "aws_s3_bucket_cors_configuration" "documents" {
+  bucket = aws_s3_bucket.documents.id
+
+  cors_rule {
+    allowed_headers = ["Content-Type"]
+    allowed_methods = ["PUT"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
 }
 
 # Deny any request that does not use TLS — required for legal document storage

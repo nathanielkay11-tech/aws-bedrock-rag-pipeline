@@ -31,6 +31,7 @@ resource "aws_cloudwatch_log_group" "ingestion_lambda" {
 # Query Lambda — answers questions via Bedrock RetrieveAndGenerate
 # ---------------------------------------------------------------------------
 resource "aws_lambda_function" "rag_query" {
+  provider         = aws.no_tags
   function_name    = var.lambda_function_name
   role             = aws_iam_role.lambda.arn
   filename         = data.archive_file.query_lambda.output_path
@@ -59,6 +60,7 @@ resource "aws_lambda_function" "rag_query" {
 # Ingestion Lambda — triggered by S3 uploads to sync the knowledge base
 # ---------------------------------------------------------------------------
 resource "aws_lambda_function" "ingestion" {
+  provider         = aws.no_tags
   function_name    = "${var.lambda_function_name}-ingestion"
   role             = aws_iam_role.ingestion_lambda.arn
   filename         = data.archive_file.ingestion_lambda.output_path
@@ -105,4 +107,46 @@ resource "aws_s3_bucket_notification" "ingestion_trigger" {
   }
 
   depends_on = [aws_lambda_permission.s3_invoke_ingestion]
+}
+
+# ---------------------------------------------------------------------------
+# Presign Lambda — generates pre-signed S3 PUT URLs so the browser can upload
+# documents directly to S3 without routing binary data through API Gateway.
+# ---------------------------------------------------------------------------
+data "archive_file" "presign_lambda" {
+  type        = "zip"
+  source_file = "${path.module}/../src/presign_handler.py"
+  output_path = "${path.module}/presign_lambda.zip"
+}
+
+resource "aws_cloudwatch_log_group" "presign_lambda" {
+  name              = "/aws/lambda/${var.lambda_function_name}-presign"
+  retention_in_days = 30
+}
+
+resource "aws_lambda_function" "presign" {
+  # Uses no_tags provider — consistent with other Lambda functions in this deployment
+  provider         = aws.no_tags
+  function_name    = "${var.lambda_function_name}-presign"
+  role             = aws_iam_role.presign_lambda.arn
+  filename         = data.archive_file.presign_lambda.output_path
+  source_code_hash = data.archive_file.presign_lambda.output_base64sha256
+  handler          = "presign_handler.lambda_handler"
+  runtime          = "python3.12"
+  timeout          = 10
+  memory_size      = 128
+
+  environment {
+    variables = {
+      # Bucket name used when constructing the presigned URL key path
+      S3_BUCKET_NAME         = aws_s3_bucket.documents.bucket
+      # Optional override; defaults to 300 s (5 minutes) in presign_handler.py
+      PRESIGN_EXPIRY_SECONDS = "300"
+    }
+  }
+
+  depends_on = [
+    aws_cloudwatch_log_group.presign_lambda,
+    aws_iam_role_policy_attachment.presign_lambda_basic,
+  ]
 }

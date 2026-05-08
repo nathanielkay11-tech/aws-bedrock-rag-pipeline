@@ -58,18 +58,15 @@ resource "aws_opensearchserverless_access_policy" "bedrock_kb" {
           ]
         }
       ]
-      Principal = [aws_iam_role.bedrock_kb.arn]
+      Principal = [
+        aws_iam_role.bedrock_kb.arn,
+        "arn:aws:iam::251478237846:user/terraform-learn-user",
+      ]
     }
   ])
 }
 
-resource "aws_opensearchserverless_collection" "kb" {
-  name = local.collection_name
-  type = "VECTORSEARCH"
-
-  depends_on = [
-    aws_opensearchserverless_security_policy.encryption,
-    aws_opensearchserverless_security_policy.network,
-    aws_opensearchserverless_access_policy.bedrock_kb,
-  ]
-}
+# Collection dev-legal-kb (hhiu3f87s5ddcodbmm13) exists and is ACTIVE.
+# It is intentionally unmanaged by Terraform because aoss:ListTagsForResource
+# is not granted on this deployment user. The ARN is stored in local.collection_arn.
+# To re-import: terraform import aws_opensearchserverless_collection.kb hhiu3f87s5ddcodbmm13
