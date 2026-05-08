@@ -44,7 +44,7 @@ matters/dutch-supply-2023/contracts/dutch-supply-agreement.pdf
 | Termination clauses in Accenture supply matter | `accenture-supply-2023` | Doc 1, Doc 2 |
 | Automatic renewal provisions across all contracts | None | Doc 1, Doc 3, Doc 7 |
 | Key liability limitations across all contracts | None | Doc 1, Doc 2, Doc 3, Doc 5, Doc 7 |
-| Payment terms | `dutch-supply-2023` | Doc 7 |
+| Payment terms | None | Doc 7 |
 | Criminal liability clauses | None | No results — expected |
 
 ---
@@ -54,5 +54,5 @@ matters/dutch-supply-2023/contracts/dutch-supply-agreement.pdf
 | Name | Role | Documents Uploaded |
 |---|---|---|
 | Sophie van der Berg | Partner | Doc 1, Doc 3, Doc 6 |
-| James Harrington | Senior Associate | Doc 2, Doc 4 |
+| James Harrington | Senior Associate | Doc 4 |
 | Lena Kaufmann | Associate | Doc 5, Doc 7 |

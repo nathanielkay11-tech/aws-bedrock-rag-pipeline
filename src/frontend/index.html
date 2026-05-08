@@ -610,6 +610,12 @@
       <div class="panel-body">
 
         <div class="field">
+          <label for="uploader-name">Uploaded By <span class="required">*</span></label>
+          <input type="text" id="uploader-name" placeholder="e.g. Sophie van der Berg"
+                 autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="field">
           <label for="upload-matter-id">Matter ID <span class="required">*</span></label>
           <input type="text" id="upload-matter-id" placeholder="e.g. ABC-2024-001"
                  autocomplete="off" spellcheck="false">
@@ -742,9 +748,15 @@ dropZone.addEventListener('drop', (e) => {
 // Upload handler — validates inputs and POSTs file + matter ID to /upload
 // ─────────────────────────────────────────────────────────────────────────────
 async function handleUpload() {
-  const matterId = document.getElementById('upload-matter-id').value.trim();
-  const btn = document.getElementById('upload-btn');
+  const uploaderName = document.getElementById('uploader-name').value.trim();
+  const matterId     = document.getElementById('upload-matter-id').value.trim();
+  const btn          = document.getElementById('upload-btn');
 
+  if (!uploaderName) {
+    showStatus('upload-status', 'error', 'Uploaded By is required.');
+    document.getElementById('uploader-name').focus();
+    return;
+  }
   if (!matterId) {
     showStatus('upload-status', 'error', 'Matter ID is required.');
     document.getElementById('upload-matter-id').focus();
@@ -759,6 +771,7 @@ async function handleUpload() {
 
   try {
     const body = new FormData();
+    body.append('uploaded_by', uploaderName);
     body.append('matter_id', matterId);
     body.append('file', selectedFile, selectedFile.name);
 
