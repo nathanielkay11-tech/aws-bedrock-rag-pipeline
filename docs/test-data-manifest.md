@@ -23,17 +23,16 @@ All documents are synthetic and generated for demo use only.
 ## S3 Folder Path Convention
 
 Documents are uploaded following this path structure:
-
-matters/<matter-id>/<document-type>/<filename.pdf>
+matters/<matter-id>/<document-type>/<uploader-name>/<filename.pdf>
 
 **Examples:**
-matters/accenture-supply-2023/contracts/accenture-supply-agreement.pdf
-matters/accenture-supply-2023/contracts/accenture-nda.pdf
-matters/hr-employment-2022/contracts/senior-associate-employment.pdf
-matters/asml-litigation-2024/filings/asml-litigation-filing.pdf
-matters/asml-litigation-2024/opinions/legal-opinion-data-processing.pdf
-matters/corporate-governance-2021/reports/corporate-governance-report.pdf
-matters/dutch-supply-2023/contracts/dutch-supply-agreement.pdf
+matters/accenture-supply-2023/contracts/sophie-van-der-berg/accenture-supply-agreement.pdf
+matters/accenture-supply-2023/contracts/nathaniel-kay/accenture-nda.pdf
+matters/hr-employment-2022/contracts/sophie-van-der-berg/senior-associate-employment.pdf
+matters/asml-litigation-2024/filings/james-harrington/asml-litigation-filing.pdf
+matters/asml-litigation-2024/opinions/lena-kaufmann/legal-opinion-data-processing.pdf
+matters/corporate-governance-2021/reports/sophie-van-der-berg/corporate-governance-report.pdf
+matters/dutch-supply-2023/contracts/lena-kaufmann/dutch-supply-agreement.pdf
 
 ---
 

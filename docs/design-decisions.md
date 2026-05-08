@@ -270,26 +270,24 @@ uploader name. Intentional metadata on every document.
 
 ---
 
-## ADR-014: S3 Object Metadata Tags for Uploader Name and Matter ID
+## ADR-014: Uploader Name Stored in S3 Folder Path
 **Date:** 06 May 2026
-**Decision:** Pass uploader name and matter ID from the frontend 
-to the ingestion Lambda via S3 object metadata tags rather than 
-embedding them in the folder path.
-**Reason:** S3 object metadata tags are the only way to pass 
-uploader name and matter ID from the frontend to the ingestion 
-Lambda — the S3 event only contains the file path, so any 
-information not in the path must be attached as metadata tags 
-or it is lost at the point of upload.
-**Architecture:** Frontend sends uploader name and matter ID 
-alongside the file. Pre-signed URL Lambda attaches both as S3 
-metadata tags — `x-amz-meta-uploader` and `x-amz-meta-matter-id`. 
-Ingestion Lambda reads both tags from the S3 object on arrival.
-**Phase 2 compatibility:** In Phase 2 with Cognito authentication, 
-uploader name is extracted automatically from the JWT token and 
-matter ID selected from the lawyer's permitted matter list. Both 
-are attached as the same metadata tags. The ingestion Lambda 
-requires no changes — only the source of the values changes. 
-The architecture is authentication-agnostic by design.
-**Outcome:** Uploader name and matter ID reliably travel from 
-frontend to knowledge base via S3 metadata tags. Both appear 
-in source citations returned to the lawyer on query.
+**Decision:** Extend the S3 folder path to include uploader 
+name as a path segment alongside matter ID and document type.
+**Reason:** Uploader name must travel from the frontend to 
+the ingestion Lambda and ultimately appear in source citations. 
+The S3 event only contains the object key — the folder path. 
+Extending the path is the minimal change that achieves this 
+without adding new infrastructure. The ingestion Lambda already 
+parses the path — adding one segment is a two line change.
+**Path structure:**
+`matters/<matter-id>/<document-type>/<uploader-name>/<filename>`
+**Example:**
+`matters/accenture-supply-2023/contracts/nathaniel-kay/accenture-nda.pdf`
+**Phase 2:** Uploader name extracted automatically from Cognito 
+JWT token and attached as S3 object metadata tag 
+`x-amz-meta-uploader`. Pre-signed URL Lambda handles attachment. 
+Folder path reverts to three segments. No ingestion Lambda 
+changes required in Phase 2.
+**Outcome:** Uploader name appears in source citations. 
+Zero new infrastructure required in Phase 1.
