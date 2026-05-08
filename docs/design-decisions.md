@@ -316,3 +316,23 @@ OpenSearch Serverless and Bedrock Knowledge Bases both require
 permissions beyond their managed policies.
 **Outcome:** Two custom policies added to terraform-learn-user. 
 Documented for reuse on any future deployment of this project.
+
+---
+
+## ADR-016: HTTP API (API Gateway v2) Over REST API (v1)
+**Date:** 06 May 2026
+**Decision:** Use HTTP API (API Gateway v2) to expose the 
+query Lambda as a public endpoint.
+**Reason:** The query interface requires one route — POST /query 
+— with one Lambda integration. HTTP API is purpose-built for 
+exactly this use case. REST API adds usage plans, API keys, and 
+request transformation that are unnecessary for a single-route 
+demo endpoint. HTTP API is simpler, lower latency, and cheaper 
+at €1 per million requests versus €3.50 for REST API.
+**Alternatives considered:** REST API (v1) — rejected due to 
+unnecessary complexity and higher cost for a single route with 
+no access control or transformation requirements.
+**Phase 2:** REST API warranted if rate limiting, API keys, 
+or per-client usage plans are required for production deployment.
+**Outcome:** Single HTTP API with one POST /query route 
+integrated directly with the query Lambda.
