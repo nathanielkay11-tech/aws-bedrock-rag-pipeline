@@ -153,19 +153,21 @@ graph TD
 
     subgraph Upload Flow
         direction TD
-        A1[Amazon S3]
-        A2[Ingestion Lambda]
-        A3[Bedrock Knowledge Base]
-        A4[OpenSearch Serverless]
-        A1 --> A2 --> A3 <--> A4
+        A1[POST /upload → Presign Lambda]
+        A2[Pre-signed S3 URL]
+        A3[Amazon S3]
+        A4[Ingestion Lambda]
+        A5[Bedrock Knowledge Base]
+        A6[OpenSearch Serverless]
+        A1 --> A2 --> A3 --> A4 --> A5 <--> A6
     end
 
     subgraph Query Flow
         direction TD
-        B1[Amazon API Gateway]
+        B1[POST /query → Amazon API Gateway]
         B2[Query Lambda]
         B4[Answer + Source Citations]
-        B1 --> B2 -->|RetrieveAndGenerate| A3 --> B4
+        B1 --> B2 -->|RetrieveAndGenerate| A5 --> B4
     end
 
     UI -->|Lawyer uploads PDF| A1
