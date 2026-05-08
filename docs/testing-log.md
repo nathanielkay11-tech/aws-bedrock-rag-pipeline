@@ -118,10 +118,8 @@ No hallucinated answer. No citations returned.
 
 ## Deployment Notes
 
-*To be completed after terraform apply*
-
-- Deployment date:
-- OpenSearch initialisation time:
-- First successful query:
-- Issues encountered:
-- Terraform destroy date:
+- Deployment date: 06 May 2026
+- OpenSearch initialisation time: ~10 minutes
+- Issues encountered: Two custom IAM policies required — TerraformRAGDeployPolicy and AOSSServiceLinkedRole inline policy. See ADR-015.
+- First successful query: Pending
+- Terraform destroy date: TBD
