@@ -148,3 +148,26 @@ conduct violation.
 
 **Target market:** Any firm handling real client matters 
 in production.
+
+---
+
+## Phase 2F: Batch Upload with Per-Matter Metadata
+
+**What it is:**
+Multi-file upload support allowing lawyers to upload multiple 
+documents simultaneously when all files belong to the same matter.
+
+**Why it's deferred:**
+Phase 1 requires intentional matter ID and uploader name input 
+per document. Batch upload is only viable when files share a 
+matter — mixing matters in a single batch creates metadata 
+errors. Phase 1 single file upload ensures accuracy.
+
+**What Phase 2F involves:**
+- Multi-file picker on upload form
+- Single matter ID and uploader name applied to entire batch
+- Progress indicator showing per-file upload status
+- Batch ingestion job triggered once after all files land in S3
+
+**Target market:** Firms onboarding large document libraries 
+or uploading multiple documents per matter simultaneously.

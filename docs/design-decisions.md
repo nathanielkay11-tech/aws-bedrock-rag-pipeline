@@ -231,3 +231,39 @@ account level, not the query level.
 **Outcome:** matter_id is an optional query parameter. 
 Unfiltered queries search all documents. Phase 2B delivers 
 full ethical wall compliance via Cognito.
+
+---
+
+## ADR-012: Manual Uploader Name Field in Phase 1
+**Date:** 06 May 2026
+**Decision:** Add a manual uploader name field to the upload 
+form as a required input alongside matter ID.
+**Reason:** Source citations need to reference who uploaded 
+a document for traceability and accountability. Phase 1 has 
+no authentication layer — Cognito user accounts are a Phase 2 
+addition. A manual name field captures this information for 
+demo purposes without requiring authentication infrastructure.
+**Phase 2:** Uploader name captured automatically from the 
+authenticated Cognito user account. Manual field removed. 
+No user input required.
+**Outcome:** Upload form includes required uploader name field. 
+Citations display uploader name alongside document name, 
+matter ID, page reference, and relevant text excerpt.
+
+---
+
+## ADR-013: Single File Upload in Phase 1
+**Date:** 06 May 2026
+**Decision:** Upload form supports single file upload only 
+in Phase 1.
+**Reason:** Each document requires an intentional matter ID 
+and uploader name input. Batch upload creates a metadata 
+problem — multiple files from different matters cannot share 
+a single matter ID without compromising the metadata accuracy 
+that the knowledge base depends on. Single file upload ensures 
+every document is filed correctly and intentionally.
+**Phase 2:** Batch upload supported where all files in a 
+batch share the same matter ID. Lawyer selects matter, 
+uploads multiple files simultaneously. See Phase 2F.
+**Outcome:** Single file upload with required matter ID and 
+uploader name. Intentional metadata on every document.

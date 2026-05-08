@@ -181,6 +181,9 @@ graph TD
 
 🔄 Iteration 2 in progress — infrastructure build complete, deployment and testing pending
 
+   Test plan and expected outcomes: [`docs/testing-log.md`](./docs/testing-log.md)  
+   Test data manifest: [`docs/test-data-manifest.md`](./docs/test-data-manifest.md)
+
 **Built:**
 - Full Terraform infrastructure — S3, OpenSearch Serverless, Bedrock Knowledge Base, Lambda, API Gateway
 - Ingestion Lambda — automated document ingestion with metadata extraction
@@ -224,6 +227,12 @@ Phase 2 solutions are documented in
   See Phase 2C.
 - **Frontend** — runs locally only. Not suitable for multi-user 
   production deployment without Phase 2 CloudFront hosting.
+  - **Batch Upload** — single file upload only. Each document 
+  requires individual matter ID and uploader name input. 
+  Batch upload deferred to Phase 2F.
+- **Uploader Identity** — uploader name is manually entered, 
+  not authenticated. Phase 2B Cognito integration captures 
+  uploader identity automatically from the logged-in account.
 
 ---
 
