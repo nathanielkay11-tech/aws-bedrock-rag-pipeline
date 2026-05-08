@@ -11,7 +11,7 @@ All documents are synthetic and generated for demo use only.
 | # | Document | Matter ID | Document Type | Uploaded By | Year |
 |---|---|---|---|---|---|
 | 1 | Accenture Supply Agreement | `accenture-supply-2023` | contracts | Sophie van der Berg | 2023 |
-| 2 | Accenture NDA | `accenture-supply-2023` | contracts | James Harrington | 2023 |
+| 2 | Accenture NDA | `accenture-supply-2023` | contracts | Nathaniel Kay | 2026 |
 | 3 | Senior Associate Employment Contract | `hr-employment-2022` | contracts | Sophie van der Berg | 2022 |
 | 4 | ASML Litigation Filing | `asml-litigation-2024` | filings | James Harrington | 2024 |
 | 5 | Legal Opinion — Data Processing | `asml-litigation-2024` | opinions | Lena Kaufmann | 2024 |
