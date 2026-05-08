@@ -93,7 +93,7 @@ def _build_retrieval_config(matter_id: str | None) -> dict:
 # ---------------------------------------------------------------------------
 # Citation extraction — flattens Bedrock's nested citation list into a
 # deduplicated array ordered by first appearance in the generated answer.
-# Each entry includes the verbatim excerpt and the parsed S3 path metadata.
+# Each entry includes excerpt, parsed S3 path metadata, and page reference.
 # ---------------------------------------------------------------------------
 def _extract_citations(raw_citations: list) -> list[dict]:
     seen_uris: set[str] = set()
@@ -106,24 +106,39 @@ def _extract_citations(raw_citations: list) -> list[dict]:
                 continue
             seen_uris.add(uri)
 
-            # Parse matter_id and document_type from the S3 URI.
-            # Expected structure: s3://<bucket>/matters/<matter_id>/<document_type>/...
-            matter_id_parsed = document_type_parsed = None
+            # Parse metadata from the S3 URI.
+            # Expected: s3://<bucket>/matters/<matter_id>/<document_type>/<uploader_name>/<filename>
+            matter_id_parsed = document_type_parsed = uploader_name_parsed = filename_parsed = None
             try:
                 # Split off "s3://bucket" prefix, then examine the key segments
                 key_parts = uri.split("/", 3)[-1].split("/")
-                if len(key_parts) >= 3 and key_parts[0] == "matters":
-                    matter_id_parsed = key_parts[1]
+                if len(key_parts) >= 4 and key_parts[0] == "matters":
+                    matter_id_parsed     = key_parts[1]
                     document_type_parsed = key_parts[2]
+                    uploader_name_parsed = key_parts[3]
+                    if len(key_parts) >= 5:
+                        filename_parsed = key_parts[4]
             except Exception:
                 pass
 
+            # Extract page reference from Bedrock chunk metadata if present.
+            # Bedrock KB surfaces page numbers under different keys depending on chunking strategy.
+            metadata = ref.get("metadata", {})
+            page_reference = (
+                metadata.get("x-amz-bedrock-kb-document-page-number")
+                or metadata.get("pageNumber")
+                or metadata.get("page_number")
+            )
+
             results.append(
                 {
-                    "excerpt": ref.get("content", {}).get("text", ""),
-                    "source_uri": uri,
-                    "matter_id": matter_id_parsed,
-                    "document_type": document_type_parsed,
+                    "excerpt":        ref.get("content", {}).get("text", ""),
+                    "source_uri":     uri,
+                    "filename":       filename_parsed,
+                    "matter_id":      matter_id_parsed,
+                    "document_type":  document_type_parsed,
+                    "uploader_name":  uploader_name_parsed,
+                    "page_reference": page_reference,
                 }
             )
 

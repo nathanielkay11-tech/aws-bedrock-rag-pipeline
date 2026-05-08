@@ -231,7 +231,8 @@
     }
 
     input[type="text"],
-    textarea {
+    textarea,
+    select {
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -250,12 +251,14 @@
     }
 
     input[type="text"]:hover,
-    textarea:hover {
+    textarea:hover,
+    select:hover {
       border-color: #2a2a40;
     }
 
     input[type="text"]:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
@@ -264,6 +267,21 @@
       resize: vertical;
       min-height: 96px;
       line-height: 1.65;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237878a0'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 34px;
+    }
+
+    select option {
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
     .field-hint {
@@ -617,8 +635,18 @@
 
         <div class="field">
           <label for="upload-matter-id">Matter ID <span class="required">*</span></label>
-          <input type="text" id="upload-matter-id" placeholder="e.g. ABC-2024-001"
+          <input type="text" id="upload-matter-id" placeholder="e.g. accenture-supply-2023"
                  autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="field">
+          <label for="doc-type">Document Type <span class="required">*</span></label>
+          <select id="doc-type">
+            <option value="contracts">Contracts</option>
+            <option value="filings">Filings</option>
+            <option value="opinions">Opinions</option>
+            <option value="reports">Reports</option>
+          </select>
         </div>
 
         <div class="field">
@@ -668,7 +696,7 @@
 
         <div class="field">
           <label for="query-matter-id">Matter ID Filter</label>
-          <input type="text" id="query-matter-id" placeholder="e.g. ABC-2024-001"
+          <input type="text" id="query-matter-id" placeholder="e.g. accenture-supply-2023"
                  autocomplete="off" spellcheck="false">
           <p class="field-hint">Leave blank to search all documents</p>
         </div>
@@ -750,6 +778,7 @@ dropZone.addEventListener('drop', (e) => {
 async function handleUpload() {
   const uploaderName = document.getElementById('uploader-name').value.trim();
   const matterId     = document.getElementById('upload-matter-id').value.trim();
+  const docType      = document.getElementById('doc-type').value;
   const btn          = document.getElementById('upload-btn');
 
   if (!uploaderName) {
@@ -767,12 +796,17 @@ async function handleUpload() {
     return;
   }
 
+  // Construct S3 key: matters/<matter-id>/<document-type>/<uploader-name>/<filename>
+  const s3Key = `matters/${matterId}/${docType}/${uploaderName}/${selectedFile.name}`;
+
   setButtonLoading(btn, true, 'Uploading…');
 
   try {
     const body = new FormData();
     body.append('uploaded_by', uploaderName);
     body.append('matter_id', matterId);
+    body.append('document_type', docType);
+    body.append('s3_key', s3Key);
     body.append('file', selectedFile, selectedFile.name);
 
     const res = await fetch(`${CONFIG.API_BASE_URL}/upload`, { method: 'POST', body });
@@ -783,7 +817,7 @@ async function handleUpload() {
     }
 
     showStatus('upload-status', 'success',
-      `"${selectedFile.name}" uploaded successfully to matter ${matterId}. ` +
+      `"${selectedFile.name}" uploaded to matter ${matterId} (${docType}). ` +
       'Ingestion into the knowledge base will complete shortly.');
 
     // Reset file picker
@@ -848,16 +882,18 @@ async function handleQuery() {
 function renderResults({ answer = '', citations = [] }) {
   const citationsHtml = citations.length
     ? citations.map((c) => {
-        const filename    = c.source_uri ? c.source_uri.split('/').pop() : 'Unknown source';
-        const matterTag   = c.matter_id    ? `<span class="citation-tag">Matter: ${esc(c.matter_id)}</span>` : '';
-        const typeTag     = c.document_type ? `<span class="citation-tag">${esc(c.document_type)}</span>` : '';
+        const filename    = c.filename || (c.source_uri ? c.source_uri.split('/').pop() : 'Unknown source');
+        const matterTag   = c.matter_id     ? `<span class="citation-tag">Matter: ${esc(c.matter_id)}</span>` : '';
+        const typeTag     = c.document_type  ? `<span class="citation-tag">${esc(c.document_type)}</span>` : '';
+        const uploaderTag = c.uploader_name  ? `<span class="citation-tag">↑ ${esc(c.uploader_name)}</span>` : '';
+        const pageTag     = c.page_reference != null ? `<span class="citation-tag">p. ${esc(String(c.page_reference))}</span>` : '';
         const excerptHtml = c.excerpt
           ? `<p class="citation-excerpt">${esc(c.excerpt)}</p>` : '';
         return `
           <div class="citation-card">
             <div class="citation-meta">
               <span class="citation-filename">${esc(filename)}</span>
-              ${matterTag}${typeTag}
+              ${matterTag}${typeTag}${uploaderTag}${pageTag}
             </div>
             ${excerptHtml}
           </div>`;
