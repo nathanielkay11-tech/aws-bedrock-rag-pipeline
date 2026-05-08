@@ -291,3 +291,28 @@ Folder path reverts to three segments. No ingestion Lambda
 changes required in Phase 2.
 **Outcome:** Uploader name appears in source citations. 
 Zero new infrastructure required in Phase 1.
+
+---
+
+## ADR-015: Iterative IAM Permission Discovery During Terraform Deployment
+**Date:** 06 May 2026
+**Decision:** Accept that custom IAM permissions require iterative 
+refinement during initial Terraform deployment.
+**Reason:** Newer AWS services — specifically OpenSearch Serverless 
+and Bedrock Knowledge Bases — require explicit permissions not 
+covered by their corresponding managed policies. These gaps are 
+only discovered during the first apply attempt.
+**Permissions added iteratively:**
+- `TerraformRAGDeployPolicy` — explicit create/delete/update 
+  permissions for OpenSearch Serverless collections and security 
+  policies, Bedrock Knowledge Bases and data sources, Lambda 
+  functions, and S3 bucket notifications
+- `AOSSServiceLinkedRole` — one-time inline policy granting 
+  `iam:CreateServiceLinkedRole` scoped to OpenSearch Serverless. 
+  Required once per AWS account to register the service.
+**Learning:** Always validate deployment permissions with 
+`terraform plan` before first apply when using newer AWS services. 
+OpenSearch Serverless and Bedrock Knowledge Bases both require 
+permissions beyond their managed policies.
+**Outcome:** Two custom policies added to terraform-learn-user. 
+Documented for reuse on any future deployment of this project.
