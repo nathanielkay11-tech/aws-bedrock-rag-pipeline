@@ -171,3 +171,24 @@ errors. Phase 1 single file upload ensures accuracy.
 
 **Target market:** Firms onboarding large document libraries 
 or uploading multiple documents per matter simultaneously.
+
+---
+
+## Phase 2G: Full Clause Highlighting in Source Citations
+
+**What it is:**
+When a lawyer clicks a source citation, the PDF opens with the 
+exact clause highlighted rather than opening to the page only.
+
+**Why it's deferred:**
+Native PDF highlighting requires converting PDFs to HTML or 
+implementing a custom PDF viewer with annotation support. 
+This significantly expands scope beyond the core RAG capability.
+
+**What Phase 2G involves:**
+- PDF to HTML conversion pipeline on ingestion
+- Custom PDF viewer with clause-level annotation
+- Citation metadata storing exact character offset of referenced text
+
+**Target market:** Any firm requiring auditable, precise 
+clause-level source verification.
