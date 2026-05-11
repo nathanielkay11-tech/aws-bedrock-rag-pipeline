@@ -63,5 +63,5 @@ variable "lambda_memory" {
 variable "bedrock_model_id" {
   description = "ID of the Bedrock foundation model used for RAG responses"
   type        = string
-  default     = "anthropic.claude-3-sonnet-20240229-v1:0"
+  default = "eu.anthropic.claude-sonnet-4-5-20250929-v1:0"
 }

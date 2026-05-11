@@ -66,7 +66,7 @@ resource "aws_opensearchserverless_access_policy" "bedrock_kb" {
   ])
 }
 
-# Collection dev-legal-kb (hhiu3f87s5ddcodbmm13) exists and is ACTIVE.
+# Collection dev-legal-kb (u0hp7ktjncq6c4w9ejqg) exists and is ACTIVE.
 # It is intentionally unmanaged by Terraform because aoss:ListTagsForResource
 # is not granted on this deployment user. The ARN is stored in local.collection_arn.
-# To re-import: terraform import aws_opensearchserverless_collection.kb hhiu3f87s5ddcodbmm13
+# To re-import: terraform import aws_opensearchserverless_collection.kb u0hp7ktjncq6c4w9ejqg

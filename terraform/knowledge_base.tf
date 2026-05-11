@@ -5,7 +5,11 @@ resource "aws_bedrockagent_knowledge_base" "legal" {
 
   # Bedrock validates the role's permissions at creation time; the inline policy
   # must be fully attached before this resource is created or it fails with access denied.
-  depends_on = [aws_iam_role_policy_attachment.bedrock_kb]
+  depends_on = [
+    aws_iam_role_policy_attachment.bedrock_kb,
+    aws_opensearchserverless_access_policy.bedrock_kb,
+    null_resource.opensearch_index,
+  ]
 
   knowledge_base_configuration {
     type = "VECTOR"
@@ -26,6 +30,31 @@ resource "aws_bedrockagent_knowledge_base" "legal" {
       }
     }
   }
+}
+
+# ---------------------------------------------------------------------------
+# OpenSearch vector index — runs on every apply so the index always exists
+# before the Knowledge Base is created or refreshed. Safe to re-run: the
+# Python script is idempotent and skips creation when the index is present.
+# ---------------------------------------------------------------------------
+resource "null_resource" "opensearch_index" {
+  # timestamp() changes on every plan, forcing this to re-run each apply.
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "python3 -m pip install -q opensearch-py requests-aws4auth && python3 '${path.module}/../scripts/create_opensearch_index.py'"
+
+    environment = {
+      COLLECTION_ENDPOINT = local.collection_endpoint
+      AWS_REGION          = var.aws_region
+      INDEX_NAME          = "legal-contracts-index"
+    }
+  }
+
+  # Access policy must exist before we can write to the collection.
+  depends_on = [aws_opensearchserverless_access_policy.bedrock_kb]
 }
 
 resource "aws_bedrockagent_data_source" "contracts" {
