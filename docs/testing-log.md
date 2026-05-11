@@ -96,8 +96,8 @@ Multiple citations referencing different matters.
 ---
 
 ### TEST-Q-004: Bilingual Query — Dutch Document
-**Query:** "What are the payment terms?"
-**Matter Filter:** `dutch-supply-2023`
+**Query:** "What are the payment terms and invoicing requirements in the Dutch supply agreement?"
+**Matter Filter:** None
 **Expected:** Answer returned in English despite source document 
 being in Dutch. Citation references Dutch Supply Agreement 
 uploaded by Lena Kaufmann.
@@ -107,13 +107,12 @@ uploaded by Lena Kaufmann.
 ---
 
 ### TEST-Q-005: Error Query — No Relevant Results
-**Query:** "What are the criminal liability clauses?"
+**Query:** "Are there any criminal liability or fraud-related penalty clauses across all contracts?"
 **Matter Filter:** None
 **Expected:** System returns a graceful no results response. 
 No hallucinated answer. No citations returned.
 **Result:** 🔄 Pending
 **Notes:**
-
 ---
 
 ## Deployment Notes
