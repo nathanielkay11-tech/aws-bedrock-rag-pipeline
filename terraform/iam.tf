@@ -98,10 +98,22 @@ resource "aws_iam_policy" "lambda_bedrock" {
         Resource = aws_bedrockagent_knowledge_base.legal.arn
       },
       {
-        Sid      = "BedrockInvokeModel"
-        Effect   = "Allow"
-        Action   = "bedrock:InvokeModel"
-        Resource = local.bedrock_model_arn
+        # InvokeModel + inference profile read/list scoped to the profile ARN.
+        # ListInferenceProfiles requires "*" — the list API has no per-resource scope.
+        Sid    = "BedrockModel"
+        Effect = "Allow"
+        Action = [
+          "bedrock:InvokeModel",
+          "bedrock:GetInferenceProfile",
+          "bedrock:ListInferenceProfiles",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "S3PresignGet"
+        Effect = "Allow"
+        Action = "s3:GetObject"
+        Resource = "${aws_s3_bucket.documents.arn}/matters/*"
       },
     ]
   })

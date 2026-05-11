@@ -538,8 +538,14 @@
 
     .citation-meta {
       display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .citation-tags {
+      display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
@@ -548,6 +554,16 @@
       font-weight: 600;
       color: var(--accent);
       letter-spacing: 0.01em;
+    }
+
+    a.citation-filename {
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    a.citation-filename:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
     .citation-tag {
@@ -725,7 +741,7 @@
 // Do not include a trailing slash.
 // ─────────────────────────────────────────────────────────────────────────────
 const CONFIG = {
-  API_BASE_URL: 'https://wps1019o31.execute-api.eu-west-1.amazonaws.com',
+  API_BASE_URL: 'https://hwcbxygxn0.execute-api.eu-west-1.amazonaws.com',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -796,31 +812,54 @@ async function handleUpload() {
     return;
   }
 
-  // Construct S3 key: matters/<matter-id>/<document-type>/<uploader-name>/<filename>
-  const s3Key = `matters/${matterId}/${docType}/${uploaderName}/${selectedFile.name}`;
-
-  setButtonLoading(btn, true, 'Uploading…');
+  // -----------------------------------------------------------------------
+  // Step 1 -- request a pre-signed S3 PUT URL from the presign Lambda.
+  // We send JSON (metadata only, no binary) so API Gateway can handle it.
+  // -----------------------------------------------------------------------
+  setButtonLoading(btn, true, 'Requesting upload URL…');
 
   try {
-    const body = new FormData();
-    body.append('uploaded_by', uploaderName);
-    body.append('matter_id', matterId);
-    body.append('document_type', docType);
-    body.append('s3_key', s3Key);
-    body.append('file', selectedFile, selectedFile.name);
+    // POST metadata to the presign Lambda; receive upload_url + content_type
+    const presignRes = await fetch(`${CONFIG.API_BASE_URL}/upload`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uploader_name: uploaderName,
+        matter_id:     matterId,
+        document_type: docType,
+        filename:      selectedFile.name,
+      }),
+    });
 
-    const res = await fetch(`${CONFIG.API_BASE_URL}/upload`, { method: 'POST', body });
+    if (!presignRes.ok) {
+      const payload = await presignRes.json().catch(() => ({}));
+      throw new Error(payload.error || `Could not get upload URL (HTTP ${presignRes.status})`);
+    }
 
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({}));
-      throw new Error(payload.error || `Upload failed (HTTP ${res.status})`);
+    const { upload_url, content_type } = await presignRes.json();
+
+    // -----------------------------------------------------------------------
+    // Step 2 -- PUT the file directly to S3 using the pre-signed URL.
+    // Content-Type must match exactly what the presign Lambda used; S3
+    // rejects the PUT if the values differ.
+    // -----------------------------------------------------------------------
+    setButtonLoading(btn, true, 'Uploading to S3…');
+
+    const uploadRes = await fetch(upload_url, {
+      method:  'PUT',
+      headers: { 'Content-Type': content_type },
+      body:    selectedFile,
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error(`S3 upload failed (HTTP ${uploadRes.status})`);
     }
 
     showStatus('upload-status', 'success',
       `"${selectedFile.name}" uploaded to matter ${matterId} (${docType}). ` +
       'Ingestion into the knowledge base will complete shortly.');
 
-    // Reset file picker
+    // Reset file picker after a successful upload
     selectedFile = null;
     fileInput.value = '';
     fileNameDisplay.textContent = 'No file selected';
@@ -883,19 +922,28 @@ function renderResults({ answer = '', citations = [] }) {
   const citationsHtml = citations.length
     ? citations.map((c) => {
         const filename    = c.filename || (c.source_uri ? c.source_uri.split('/').pop() : 'Unknown source');
-        const matterTag   = c.matter_id     ? `<span class="citation-tag">Matter: ${esc(c.matter_id)}</span>` : '';
-        const typeTag     = c.document_type  ? `<span class="citation-tag">${esc(c.document_type)}</span>` : '';
-        const uploaderTag = c.uploader_name  ? `<span class="citation-tag">↑ ${esc(c.uploader_name)}</span>` : '';
-        const pageTag     = c.page_reference != null ? `<span class="citation-tag">p. ${esc(String(c.page_reference))}</span>` : '';
-        const excerptHtml = c.excerpt
-          ? `<p class="citation-excerpt">${esc(c.excerpt)}</p>` : '';
+        const _CLAUSE_RE  = /(\d+(?:\.\d+)+|(?:Clause|Section)\s+\d+(?:\.\d+)*)/i;
+        const TAG         = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.08)';
+        const CLAUSE_TAG  = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(200,169,110,0.08);border:1px solid #c8a96e;color:#c8a96e';
+        const matterTag   = c.matter_id    ? `<span style="${TAG}">Matter: ${esc(c.matter_id)}</span>` : '';
+        const typeTag     = c.document_type ? `<span style="${TAG}">${esc(c.document_type)}</span>` : '';
+        const uploaderTag = c.uploader_name ? `<span style="${TAG}">↑ ${esc(c.uploader_name)}</span>` : '';
+        const pageTag     = c.page_reference != null ? `<span style="${TAG}">p. ${esc(String(c.page_reference))}</span>` : '';
+        const excerptHead = c.excerpt ? c.excerpt.slice(0, 50) : '';
+        const clauseMatch = excerptHead.match(_CLAUSE_RE);
+        const clauseText  = clauseMatch ? (/^\d/.test(clauseMatch[0]) ? `Clause ${clauseMatch[0]}` : clauseMatch[0]) : '';
+        const clauseTag   = clauseText ? `<span style="${CLAUSE_TAG}">${esc(clauseText)}</span>` : '';
+        const filenameEl  = c.document_url
+          ? `<a class="citation-filename" style="display:block;margin-bottom:8px" href="${esc(c.document_url)}" target="_blank" rel="noopener noreferrer">${esc(filename)}</a>`
+          : `<span class="citation-filename" style="display:block;margin-bottom:8px">${esc(filename)}</span>`;
+        const tagsRow     = `<div style="display:flex;flex-wrap:wrap;gap:6px;">${matterTag}${typeTag}${uploaderTag}${pageTag}${clauseTag}</div>`;
+        const excerptEl   = c.excerpt
+          ? `<span style="display:block;margin-top:8px;font-size:12px;opacity:0.7">${esc(c.excerpt)}</span>` : '';
         return `
           <div class="citation-card">
-            <div class="citation-meta">
-              <span class="citation-filename">${esc(filename)}</span>
-              ${matterTag}${typeTag}${uploaderTag}${pageTag}
-            </div>
-            ${excerptHtml}
+            ${filenameEl}
+            ${tagsRow}
+            ${excerptEl}
           </div>`;
       }).join('')
     : `<p class="no-citations">No source citations were returned for this query.</p>`;

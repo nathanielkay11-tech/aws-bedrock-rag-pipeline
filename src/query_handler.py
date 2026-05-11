@@ -2,8 +2,10 @@ import json
 import logging
 import os
 import re
+import urllib.parse
 
 import boto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
@@ -18,15 +20,14 @@ BEDROCK_MODEL_ID = os.environ["BEDROCK_MODEL_ID"]
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", os.environ.get("AWS_REGION", "eu-west-1"))
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
-# RetrieveAndGenerate requires a full model ARN. If BEDROCK_MODEL_ID is already
-# an ARN (e.g. a cross-region inference profile) use it as-is; otherwise build one.
-MODEL_ARN = (
-    BEDROCK_MODEL_ID
-    if BEDROCK_MODEL_ID.startswith("arn:")
-    else f"arn:aws:bedrock:{BEDROCK_REGION}::foundation-model/{BEDROCK_MODEL_ID}"
-)
-
 bedrock_runtime = boto3.client("bedrock-agent-runtime", region_name=BEDROCK_REGION)
+
+_AWS_REGION = os.environ.get("AWS_REGION", "eu-west-1")
+_s3 = boto3.client(
+    "s3",
+    region_name=_AWS_REGION,
+    config=Config(s3={"addressing_style": "virtual"}, signature_version="s3v4"),
+)
 
 MAX_QUESTION_LEN = 1000
 _MATTER_ID_RE = re.compile(r"^[A-Za-z0-9_\-]+$")
@@ -91,6 +92,29 @@ def _build_retrieval_config(matter_id: str | None) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Pre-signed GET URL — lets the browser open the source document directly.
+# Returns None silently on any error so a missing URL never breaks the response.
+# ---------------------------------------------------------------------------
+def _presign_url(s3_uri: str, expiry: int = 3600, page: int | None = None) -> str | None:
+    if not S3_BUCKET_NAME or not s3_uri:
+        return None
+    try:
+        key = s3_uri.split("/", 3)[-1]
+        url = _s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": S3_BUCKET_NAME, "Key": key},
+            ExpiresIn=expiry,
+        )
+        # #page=N is a client-side PDF viewer fragment — never sent to S3.
+        if page is not None:
+            url = f"{url}#page={page}"
+        return url
+    except Exception as exc:
+        logger.warning("Could not generate presigned URL for %s: %s", s3_uri, exc)
+        return None
+
+
+# ---------------------------------------------------------------------------
 # Citation extraction — flattens Bedrock's nested citation list into a
 # deduplicated array ordered by first appearance in the generated answer.
 # Each entry includes excerpt, parsed S3 path metadata, and page reference.
@@ -113,11 +137,11 @@ def _extract_citations(raw_citations: list) -> list[dict]:
                 # Split off "s3://bucket" prefix, then examine the key segments
                 key_parts = uri.split("/", 3)[-1].split("/")
                 if len(key_parts) >= 4 and key_parts[0] == "matters":
-                    matter_id_parsed     = key_parts[1]
-                    document_type_parsed = key_parts[2]
-                    uploader_name_parsed = key_parts[3]
+                    matter_id_parsed     = urllib.parse.unquote(key_parts[1])
+                    document_type_parsed = urllib.parse.unquote(key_parts[2])
+                    uploader_name_parsed = urllib.parse.unquote(key_parts[3])
                     if len(key_parts) >= 5:
-                        filename_parsed = key_parts[4]
+                        filename_parsed = urllib.parse.unquote(key_parts[4])
             except Exception:
                 pass
 
@@ -139,6 +163,10 @@ def _extract_citations(raw_citations: list) -> list[dict]:
                     "document_type":  document_type_parsed,
                     "uploader_name":  uploader_name_parsed,
                     "page_reference": page_reference,
+                    "document_url":   _presign_url(
+                        uri,
+                        page=int(page_reference) if page_reference is not None else None,
+                    ),
                 }
             )
 
@@ -147,11 +175,23 @@ def _extract_citations(raw_citations: list) -> list[dict]:
 
 # ---------------------------------------------------------------------------
 # Response helpers — enforce a consistent API Gateway envelope shape.
+# CORS headers are included on every response (including errors) so the
+# browser can read the body when a non-2xx status code is returned. API
+# Gateway adds its own CORS headers for recognised origins, but having them
+# here as well ensures coverage for the "null" origin (file:// requests) and
+# any edge case where the gateway layer doesn't inject them.
 # ---------------------------------------------------------------------------
+_CORS_HEADERS = {
+    "Access-Control-Allow-Origin":  "*",
+    "Access-Control-Allow-Headers": "Content-Type,Authorization",
+    "Access-Control-Allow-Methods": "POST,OPTIONS",
+}
+
+
 def _response(status_code: int, body: dict) -> dict:
     return {
         "statusCode": status_code,
-        "headers": {"Content-Type": "application/json"},
+        "headers": {"Content-Type": "application/json", **_CORS_HEADERS},
         "body": json.dumps(body),
     }
 
@@ -164,6 +204,13 @@ def _error(status_code: int, message: str) -> dict:
 # Handler entry point
 # ---------------------------------------------------------------------------
 def lambda_handler(event: dict, context) -> dict:
+    # ------------------------------------------------------------------
+    # Handle CORS preflight — browser sends OPTIONS before every cross-origin
+    # POST; returning 200 with CORS headers satisfies the preflight check.
+    # ------------------------------------------------------------------
+    if event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
+        return _response(200, {})
+
     # ------------------------------------------------------------------
     # Parse and validate the incoming request body
     # ------------------------------------------------------------------
@@ -185,7 +232,7 @@ def lambda_handler(event: dict, context) -> dict:
     # Bedrock uses its default number-of-results setting.
     # ------------------------------------------------------------------
     retrieval_config = _build_retrieval_config(matter_id)
-    kb_config: dict = {"knowledgeBaseId": KNOWLEDGE_BASE_ID, "modelArn": MODEL_ARN}
+    kb_config: dict = {"knowledgeBaseId": KNOWLEDGE_BASE_ID, "modelArn": BEDROCK_MODEL_ID}
     if retrieval_config:
         kb_config["retrievalConfiguration"] = retrieval_config
 
