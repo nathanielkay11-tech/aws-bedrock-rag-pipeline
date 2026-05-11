@@ -741,7 +741,7 @@
 // Do not include a trailing slash.
 // ─────────────────────────────────────────────────────────────────────────────
 const CONFIG = {
-  API_BASE_URL: 'https://hwcbxygxn0.execute-api.eu-west-1.amazonaws.com',
+  API_BASE_URL: 'https://hwcbxygxn0.execute-api.eu-west-1.amazonaws.com/'
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -876,10 +876,14 @@ async function handleUpload() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Query handler — validates inputs, POSTs to /query, renders answer + citations
 // ─────────────────────────────────────────────────────────────────────────────
+// Holds the AbortController for the in-flight request so a new query can cancel
+// a previous one before it completes, guaranteeing clean per-request state.
+let _queryController = null;
+
 async function handleQuery() {
   const question = document.getElementById('question').value.trim();
   const matterId = document.getElementById('query-matter-id').value.trim() || null;
-  const btn = document.getElementById('query-btn');
+  const btn      = document.getElementById('query-btn');
 
   if (!question) {
     showStatus('query-status', 'error', 'Please enter a question.');
@@ -887,15 +891,22 @@ async function handleQuery() {
     return;
   }
 
+  // Cancel any in-flight request and create a fresh controller for this one
+  if (_queryController) _queryController.abort();
+  _queryController = new AbortController();
+
+  // Reset all display state before every request
   document.getElementById('query-status').innerHTML = '';
   document.getElementById('results-area').innerHTML = '';
   setButtonLoading(btn, true, 'Searching…');
 
   try {
     const res = await fetch(`${CONFIG.API_BASE_URL}/query`, {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, matter_id: matterId }),
+      body:    JSON.stringify({ question, matter_id: matterId }),
+      cache:   'no-store',
+      signal:  _queryController.signal,
     });
 
     const data = await res.json();
@@ -903,18 +914,21 @@ async function handleQuery() {
     if (!res.ok) {
       if (res.status === 429)
         throw new Error('Rate limit reached — please wait a moment and try again.');
-      throw new Error(data.error || `Request failed (HTTP ${res.status})`);
+      throw new Error(data.error || `Request failed (HTTP ${res.status})`);
     }
 
     renderResults(data);
 
   } catch (err) {
-    showStatus('query-status', 'error', err.message || 'Query failed. Please try again.');
+    // AbortError is an intentional cancel (new query started) — show nothing
+    if (err.name !== 'AbortError') {
+      showStatus('query-status', 'error', err.message || 'Query failed. Please try again.');
+    }
   } finally {
+    // Always re-enable the button regardless of outcome
     setButtonLoading(btn, false, 'Submit Query');
   }
 }
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Results renderer — builds answer block and citation cards from API response
 // ─────────────────────────────────────────────────────────────────────────────
@@ -937,8 +951,8 @@ function renderResults({ answer = '', citations = [] }) {
           ? `<a class="citation-filename" style="display:block;margin-bottom:8px" href="${esc(c.document_url)}" target="_blank" rel="noopener noreferrer">${esc(filename)}</a>`
           : `<span class="citation-filename" style="display:block;margin-bottom:8px">${esc(filename)}</span>`;
         const tagsRow     = `<div style="display:flex;flex-wrap:wrap;gap:6px;">${matterTag}${typeTag}${uploaderTag}${pageTag}${clauseTag}</div>`;
-        const excerptEl   = c.excerpt
-          ? `<span style="display:block;margin-top:8px;font-size:12px;opacity:0.7">${esc(c.excerpt)}</span>` : '';
+        const excerptEl = c.excerpt
+  ? `<span style="display:block;margin-top:8px;font-size:12px;opacity:0.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(c.excerpt)}</span>` : '';
         return `
           <div class="citation-card">
             ${filenameEl}
