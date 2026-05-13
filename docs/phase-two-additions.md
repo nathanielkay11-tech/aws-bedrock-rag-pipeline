@@ -192,3 +192,29 @@ This significantly expands scope beyond the core RAG capability.
 
 **Target market:** Any firm requiring auditable, precise 
 clause-level source verification.
+
+---
+
+## Phase 2H: Multilingual Document Viewing
+
+**What it is:**
+When a source citation references a document in a language other 
+than English, provide an in-browser translation of the relevant 
+clause rather than requiring the lawyer to open and manually 
+translate the source document.
+
+**Why it's deferred:**
+Phase 1 returns answers in English regardless of source document 
+language — Bedrock handles translation automatically. The source 
+document itself remains in the original language. Viewing the 
+exact clause in context requires opening the native document.
+
+**What Phase 2H involves:**
+- Detect source document language on ingestion
+- For non-English documents, store a translated version alongside 
+  the original
+- Citation link opens translated version with clause highlighted
+- Original language version available as secondary link
+
+**Target market:** European law firms handling cross-border matters 
+in multiple languages — directly relevant to Netherlands market.

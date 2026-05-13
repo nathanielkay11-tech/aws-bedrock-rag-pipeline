@@ -741,7 +741,7 @@
 // Do not include a trailing slash.
 // ─────────────────────────────────────────────────────────────────────────────
 const CONFIG = {
-  API_BASE_URL: 'https://hwcbxygxn0.execute-api.eu-west-1.amazonaws.com/'
+  API_BASE_URL: 'https://957ilvvg70.execute-api.eu-west-1.amazonaws.com',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1012,9 +1012,29 @@ function esc(str) {
     .replace(/'/g, '&#39;');
 }
 
-// Preserve line breaks in the answer body
 function formatAnswer(str) {
-  return esc(str).replace(/\n/g, '<br>');
+  const PDF_RE  = /(\S+\.pdf)/gi;
+  const NAME_RE = /\b([A-Z][A-Za-z0-9.'-]*(?:\s+[A-Za-z0-9.'-]+)*?\s+(?:[Aa]greement|[Cc]ontract|[Ff]iling))\b/g;
+
+  function applyBold(escaped) {
+    return escaped
+      .replace(PDF_RE,  '<strong>$1</strong>')
+      .replace(NAME_RE, '<strong>$1</strong>');
+  }
+
+  if (str.includes('•')) {
+    const parts = str.split('•').map(s => s.trim()).filter(Boolean);
+    return '<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px">' +
+      parts.map(p =>
+        '<li style="display:flex;gap:10px;align-items:baseline">' +
+        '<span style="color:var(--accent);flex-shrink:0;line-height:1.8">•</span>' +
+        '<span style="line-height:1.8">' + applyBold(esc(p)) + '</span>' +
+        '</li>'
+      ).join('') +
+      '</ul>';
+  }
+
+  return applyBold(esc(str)).replace(/\n/g, '<br>');
 }
 
 // Cmd/Ctrl + Enter submits the query from the textarea
