@@ -6,9 +6,10 @@
 > retrieval layer on top of Bedrock — moving from "I can make infrastructure
 > intelligent" to "I can make infrastructure answer questions."
 
-> 🚧 **Work in Progress** — This project is actively being built and
-> documented. Architecture decisions, cost analysis and testing results
-> will be added as each iteration completes.
+---
+
+## 🎬 Demo Video
+[Watch the full demo on YouTube](https://youtu.be/Sdih82BqQtI)
 
 ---
 
@@ -22,7 +23,7 @@
 - **The Goal:** To design a production-quality RAG system from first
   principles — defining the retrieval strategy, chunking approach, and
   query architecture before writing a single line of code.
-- **Status:** 🔄 In progress
+- **Status:** ✅ Complete — ADR-001 through ADR-017
 
 ### 📍 Iteration 2: Infrastructure Build and Testing
 - **What it is:** Full Terraform IaC deployment of all AWS services,
@@ -31,16 +32,13 @@
 - **The Goal:** To prove the architecture works in a real AWS environment
   — query accuracy, citation quality, and latency documented with
   evidence in [`/docs/testing-log.md`](./docs/testing-log.md).
-- **Status:** 🔄 Not started
+- **Status:** ✅ Complete — 5/5 queries passed. See [`docs/test-results.md`](./docs/test-results.md)
 
-### 📍 Iteration 3: One-Shot Prompt Engineering
-- **What it is:** A single, multi-constraint prompt capable of
-  reproducing the complete Terraform infrastructure and Lambda function
-  from scratch in one AI-assisted pass.
-- **The Goal:** To demonstrate prompt engineering maturity — treating
-  the AI as a junior engineer and validating every output as the
-  architect.
-- **Status:** 🔄 Not started
+### 📍 Iteration 3: One-Shot Reproduction Prompt
+- **Status:** Not included in this project — the architecture complexity 
+  of Bedrock Knowledge Bases and OpenSearch Serverless exceeds what can 
+  be reliably reproduced in a single prompt. See the pipeline project for 
+  a demonstration of this technique.
 
 ---
 
@@ -179,61 +177,65 @@ graph TD
 
 ## 🚀 Project Status
 
-✅ Iteration 1 complete — architecture design and ADRs (ADR-001 through ADR-011)
+✅ Iteration 1 complete — architecture design and ADRs (ADR-001 through ADR-017)
 
-🔄 Iteration 2 in progress — infrastructure build complete, deployment and testing pending
-
-   Test plan and expected outcomes: [`docs/testing-log.md`](./docs/testing-log.md)  
-   Test data manifest: [`docs/test-data-manifest.md`](./docs/test-data-manifest.md)
+✅ Iteration 2 complete — infrastructure deployed, tested, and demo recorded
 
 **Built:**
 - Full Terraform infrastructure — S3, OpenSearch Serverless, Bedrock Knowledge Base, Lambda, API Gateway
-- Ingestion Lambda — automated document ingestion with metadata extraction
-- Query Lambda — RetrieveAndGenerate with optional matter filter and source citations
+- Presign Lambda — secure browser-to-S3 upload with pre-signed URLs
+- Ingestion Lambda — automated document ingestion with S3 path metadata extraction
+- Query Lambda — RetrieveAndGenerate with matter filter and source citations
 - HTML Frontend — Vandermeer & Associates Document Intelligence Platform
 
-**Pending:**
-- Deployment and end-to-end testing
-- Demo video
-- Cost analysis update with real deployment figures
-
-
-## 🎬 Demo Video
-[Watch the full demo on YouTube](https://youtu.be/Sdih82BqQtI)
+Test plan: [`docs/testing-log.md`](./docs/testing-log.md)
+Test data manifest: [`docs/test-data-manifest.md`](./docs/test-data-manifest.md)
+Test results: [`docs/test-results.md`](./docs/test-results.md)
 
 ---
 
 ## ✅ Testing Results
 
-*Coming in Iteration 2*
+5/5 queries passed. Full results in [`docs/test-results.md`](./docs/test-results.md).
+
+| Test | Query Type | Result |
+| --- | --- | --- |
+| TEST-Q-001 | Precision query | ✅ Passed |
+| TEST-Q-002 | Cross-document query | ✅ Passed |
+| TEST-Q-003 | Synthesis query | ✅ Passed |
+| TEST-Q-004 | Bilingual query | ✅ Passed |
+| TEST-Q-005 | Error query | ✅ Passed |
 
 ---
 
 ## ⚠️ Known Limitations
 
-The following limitations apply to Phase 1. Full details and 
-Phase 2 solutions are documented in 
+The following limitations apply to Phase 1. Full details and
+Phase 2 solutions are documented in
 [`docs/phase-two-additions.md`](./docs/phase-two-additions.md).
 
-- **Ethical Walls** — no access control. All users can query 
-  all documents. Phase 1 suitable for firms where all staff 
+- **Ethical Walls** — no access control. All users can query
+  all documents. Phase 1 suitable for firms where all staff
   access all matters only. See Phase 2B.
-- **GDPR** — partial compliance. Encryption at rest and private 
-  access implemented. Data subject rights and formal DPAs not 
+- **GDPR** — partial compliance. Encryption at rest and private
+  access implemented. Data subject rights and formal DPAs not
   included. See Phase 2D.
-- **Document Retention** — not enforced. No S3 lifecycle policy 
+- **Document Retention** — not enforced. No S3 lifecycle policy
   preventing deletion within legal retention periods. See Phase 2E.
-- **Audit Trail** — not implemented. No query logging. Not 
-  suitable for firms with compliance or billing requirements. 
+- **Audit Trail** — not implemented. No query logging. Not
+  suitable for firms with compliance or billing requirements.
   See Phase 2C.
-- **Frontend** — runs locally only. Not suitable for multi-user 
+- **Frontend** — runs locally only. Not suitable for multi-user
   production deployment without Phase 2 CloudFront hosting.
-  - **Batch Upload** — single file upload only. Each document 
-  requires individual matter ID and uploader name input. 
+- **Batch Upload** — single file upload only. Each document
+  requires individual matter ID and uploader name input.
   Batch upload deferred to Phase 2F.
-- **Uploader Identity** — uploader name is manually entered, 
-  not authenticated. Phase 2B Cognito integration captures 
+- **Uploader Identity** — uploader name is manually entered,
+  not authenticated. Phase 2B Cognito integration captures
   uploader identity automatically from the logged-in account.
+- **Multilingual Document Viewing** — answers returned in English
+  regardless of source document language. Viewing source clauses
+  in translated form deferred to Phase 2H.
 
 ---
 
