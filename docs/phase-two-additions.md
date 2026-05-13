@@ -99,14 +99,14 @@ those wanting to track associate research time for billing.
 
 ---
 
-## Phase 2D: Multi-Language Support
+## Phase 2D: Multilingual Embedding Optimisation
 
 **What it is:**
 Support for contracts and queries in languages beyond English — 
 relevant for European law firms handling cross-border matters.
 
 **Why it's deferred:**
-Phase 1 assumes English-language documents and queries. 
+Phase 1 returns answers in English regardless of source document language — Bedrock handles cross-language retrieval automatically. Phase 2D optimises embedding quality specifically for non-English legal documents.
 Multilingual support requires embedding model evaluation 
 for non-English text and query language detection logic.
 

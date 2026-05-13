@@ -48,9 +48,7 @@ locals {
       : "arn:aws:bedrock:${var.aws_region}::foundation-model/${var.bedrock_model_id}"
   )
 
-  # The AOSS collection is managed outside Terraform state to avoid
-  # aoss:ListTagsForResource calls during refresh. ARN is fixed after creation.
-  collection_arn = "arn:aws:aoss:eu-west-1:251478237846:collection/u0hp7ktjncq6c4w9ejqg"
+ collection_arn = aws_opensearchserverless_collection.kb.arn
 
   # Derived from the collection ARN — used by the local-exec index provisioner.
   collection_id       = regex("collection/(.+)$", local.collection_arn)[0]

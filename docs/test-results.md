@@ -1,7 +1,7 @@
 # Test Query Results
 
-**Run:** 2026-05-11 09:48 UTC  
-**Endpoint:** `https://hwcbxygxn0.execute-api.eu-west-1.amazonaws.com/query`
+**Run:** 2026-05-13 08:49 UTC  
+**Endpoint:** `https://957ilvvg70.execute-api.eu-west-1.amazonaws.com/query`
 
 ## Query 1
 
@@ -14,7 +14,7 @@ The Accenture supply agreement contains several termination provisions. The agre
 
 
 
-Either party may terminate the agreement immediately for cause in specific circumstances: if the other party commits a material breach and fails to remedy it within thirty days of written notice; if the other party becomes insolvent, subject to administration, receivership, bankruptcy or similar proceedings; or if the other party ceases or threatens to cease carrying on business.
+Either party may terminate immediately for cause in three situations: if the other party commits a material breach and fails to remedy it within thirty days of written notice; if the other party becomes insolvent or subject to administration, receivership, bankruptcy or similar proceedings; or if the other party ceases or threatens to cease carrying on business.
 
 
 
@@ -22,7 +22,7 @@ Additionally, either party may terminate the agreement for convenience by provid
 
 
 
-Upon termination or expiry, all outstanding statements of work terminate unless otherwise agreed in writing, each party must promptly return or securely destroy the other party's confidential information, and accrued payment obligations survive.
+Upon termination or expiry, all outstanding Statements of Work terminate unless otherwise agreed in writing, each party must promptly return or securely destroy the other's confidential information, and accrued payment obligations survive.
 
 ### Citations
 
@@ -41,7 +41,7 @@ Upon termination or expiry, all outstanding statements of work terminate unless 
 
 ### Answer
 
-The Accenture BV Master Supply Agreement contains an automatic renewal provision. After the initial two-year term expires, the agreement automatically renews for successive one-year periods unless either party provides written notice of non-renewal at least ninety days prior to the expiry of the then-current term. The ASML Holding NV supply agreement with Precision Components GmbH does not provide for automatic renewal. It has a fixed term of thirty-six months expiring on 11 September 2025.
+The Accenture BV Master Supply Agreement contains an automatic renewal provision. After the initial two-year term expires, the agreement automatically renews for successive one-year periods unless either party provides written notice of non-renewal at least ninety days prior to the expiry of the then-current term. The ASML Holding NV supply agreement with Precision Components GmbH does not contain an automatic renewal provision. It was fixed for a thirty-six month term expiring on 11 September 2025.
 
 ### Citations
 
@@ -63,7 +63,7 @@ The Accenture BV Master Supply Agreement contains an automatic renewal provision
 
 ### Answer
 
-• Employment contracts limit personal liability for employees to the extent of their direct culpability for losses arising from negligence, with professional indemnity insurance coverage provided during employment. • General supplier liability is capped at amounts paid by the customer in the preceding twelve months, with a maximum of EUR 750,000 per incident. • Consequential damages including indirect loss, lost profits, lost revenue, and anticipated savings are excluded from liability across multiple agreements. • Aggregate liability caps of EUR 500,000 per agreement year apply in master supply agreements, covering contract, tort, and negligence claims. • Liability limitations do not apply to death or personal injury from negligence, fraud or fraudulent misrepresentation, willful misconduct, gross negligence, or other liability that cannot be lawfully excluded.
+• Personal liability for employees limited to the extent of their direct culpability, with professional indemnity insurance coverage during employment • General liability caps include EUR 500,000 per agreement year and EUR 750,000 per incident, with some contracts limiting liability to amounts paid in the preceding twelve months • Indirect and consequential damages are excluded across contracts, including loss of profit, revenue, business, or anticipated savings • Liability limitations do not apply to death or personal injury from negligence, fraud, fraudulent misrepresentation, willful misconduct, gross negligence, or other legally non-excludable liability • Some contracts contain no general liability cap, leaving certain claims for production losses and damages potentially uncapped
 
 ### Citations
 
@@ -72,6 +72,7 @@ The Accenture BV Master Supply Agreement contains an automatic renewal provision
 | `senior-associate-employment.pdf` | hr-employment-2022 | contracts | Sophie van der Berg | 3 |
 | `dutch-supply-agreement.pdf` | dutch-supply-2023 | contracts | Lena Kaufmann | 3 |
 | `accenture-supply-agreement.pdf` | accenture-supply-2023 | contracts | Sophie van der Berg | 2 |
+| `asml-litigation-filing.pdf` | asml-litigation-2024 | filings | James Harrington | 3 |
 
 **Excerpts**
 
@@ -81,6 +82,8 @@ The Accenture BV Master Supply Agreement contains an automatic renewal provision
 
 **[3]** The Parties shall resolve any dispute in     good faith within thirty (30) days.VANDERMEER & ASSOCIATES Ref: VA/2024/MSA/0047     Accenture BV - Master Supply Agreement CONFIDENTIAL Page 3     4. LIABILITY AND INDEMNIFICATION     4.1 Mutual Cap on Liability. Subject to Clause 4.3, the aggregate liab…
 
+**[4]** Liability Structure. The Agreement contains no general limitation of liability clause. Clause 18 of     the Agreement provides a specific cap of EUR 1,000,000 on liability for damage to tooling, but this     cap does not apply to the losses claimed herein, which relate to production downtime and los…
+
 ## Query 4
 
 **Question:** What are the payment terms?  
@@ -88,7 +91,7 @@ The Accenture BV Master Supply Agreement contains an automatic renewal provision
 
 ### Answer
 
-The payment terms specify that the purchaser (Afnemer) shall pay the purchase price within sixty (60) working days after receipt of a correct invoice, provided that the delivered goods meet the agreed specifications. Invoices must be submitted through the purchaser's electronic procurement platform (Coupa) and must include the purchase order number, article number, delivered quantity, unit price, and applicable VAT amount. In case of late payment, statutory commercial interest is due by law from the due date until full payment is made. The purchaser is also authorized to set off claims against the supplier with payment obligations to the supplier.
+The payment terms specify that the Buyer shall pay the Purchase Price within sixty (60) Working Days after receipt of a correct invoice, provided that the delivered Goods comply with the agreed specifications. Invoices must be submitted via the Buyer's electronic purchasing platform (Coupa) and must include at minimum: the Purchase Order number, article number, delivered quantity, unit price, and applicable VAT amount. In case of late payment, the Buyer is legally obligated to pay interest equal to the statutory commercial interest rate, calculated from the due date until the day of full payment. The Buyer is also entitled to set off claims against the Supplier with payment obligations to the Supplier.
 
 ### Citations
 
@@ -107,7 +110,7 @@ The payment terms specify that the purchaser (Afnemer) shall pay the purchase pr
 
 ### Answer
 
-The search results do not contain any criminal liability clauses. The documents provided discuss civil liability matters, including limitations on liability amounts, exclusions for indirect damages, contractual non-performance liability, GDPR-related liability, and professional indemnity coverage. However, none of these materials address criminal liability provisions.
+I could not find any criminal liability clauses in the search results provided. The documents contain references to civil liability, contractual liability limitations, and liability for damages under contract law and GDPR, but there are no specific clauses addressing criminal liability.
 
 ### Citations
 

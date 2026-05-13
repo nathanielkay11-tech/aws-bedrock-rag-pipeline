@@ -13,29 +13,32 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-API_URL = "https://hwcbxygxn0.execute-api.eu-west-1.amazonaws.com/query"
+# ⚠️ Update this URL after every terraform apply — API Gateway ID changes each deployment
+API_URL = "https://957ilvvg70.execute-api.eu-west-1.amazonaws.com/query"
+
+API_URL = "https://957ilvvg70.execute-api.eu-west-1.amazonaws.com/query"
 RESULTS_PATH = Path(__file__).parent.parent / "docs" / "test-results.md"
 TIMEOUT = 60  # seconds per request
 
 QUERIES = [
     {
-        "question": "What are the termination clauses in the Accenture supply agreement?",
-        "matter_id": "accenture-supply-2023",
+        "question": "What are the termination clauses across all contracts?",
+        "matter_id": None,
     },
     {
         "question": "Which contracts contain automatic renewal provisions and what are the notice periods?",
         "matter_id": None,
     },
     {
-        "question": "Summarise the key liability limitations across all contracts in no more than five concise bullet points.",
+        "question": "Summarise the key liability limitations across all contracts",
         "matter_id": None,
     },
     {
-        "question": "What are the payment terms?",
+        "question": "What are the payment terms and invoicing requirements in the Dutch supply agreement?",
         "matter_id": None,
     },
     {
-        "question": "What are the criminal liability clauses?",
+        "question": "Are there any criminal liability or fraud-related penalty clauses across all contracts?",
         "matter_id": None,
     },
 ]

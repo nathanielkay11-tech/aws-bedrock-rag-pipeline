@@ -12,6 +12,17 @@ resource "aws_opensearchserverless_security_policy" "encryption" {
   })
 }
 
+resource "aws_opensearchserverless_collection" "kb" {
+  name = local.collection_name
+  type = "VECTORSEARCH"
+
+  depends_on = [
+    aws_opensearchserverless_security_policy.encryption,
+    aws_opensearchserverless_security_policy.network,
+    aws_opensearchserverless_access_policy.bedrock_kb,
+  ]
+}
+
 # Public network access is required so Bedrock's service role can reach the collection
 resource "aws_opensearchserverless_security_policy" "network" {
   name = "${var.environment}-kb-net"

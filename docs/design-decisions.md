@@ -195,8 +195,11 @@ document type, and selects a file. Frontend calls POST /upload
 to the presign Lambda via API Gateway, receives a pre-signed 
 S3 PUT URL, then uploads the file directly to S3 from the 
 browser. AWS credentials never exposed to the client.
-**Query flow:** Lawyer types a question with an optional 
-matter ID filter. Frontend calls POST /query via API Gateway, 
+**Query flow:** Lawyer types a question. Frontend calls POST /query 
+via API Gateway, query Lambda calls Bedrock RetrieveAndGenerate, 
+answer and source citations returned and rendered. Matter ID 
+filtering is supported at the API level but removed from the 
+Phase 1 frontend — see Phase 2B for matter-level access control.Frontend calls POST /query via API Gateway, 
 query Lambda calls Bedrock RetrieveAndGenerate, answer and 
 source citations returned and rendered.
 **Implementation:** Single self-contained HTML file. 
