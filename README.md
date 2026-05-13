@@ -199,8 +199,7 @@ graph TD
 
 
 ## 🎬 Demo Video
-
-*Coming in Iteration 2*
+[Watch the full demo on YouTube](https://youtu.be/Sdih82BqQtI)
 
 ---
 
