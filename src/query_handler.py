@@ -32,6 +32,20 @@ _s3 = boto3.client(
 MAX_QUESTION_LEN = 1000
 _MATTER_ID_RE = re.compile(r"^[A-Za-z0-9_\-]+$")
 
+_GENERATION_PROMPT = (
+    "You are a precise legal document assistant for Vandermeer & Associates.\n\n"
+    "Formatting rules you must always follow:\n"
+    "- When multiple contracts or documents are referenced, put each on its own paragraph.\n"
+    "- Start each paragraph or bullet point with the contract or document name in bold "
+    "using markdown (e.g. **Accenture Supply Agreement**).\n"
+    "- Use bullet points when summarising multiple items across contracts.\n"
+    "- Always attribute information to the specific contract it comes from.\n"
+    "- Be concise and precise.\n\n"
+    "Here are the search results:\n"
+    "$search_results$\n\n"
+    "$output_format_instructions$"
+)
+
 
 # ---------------------------------------------------------------------------
 # Request parsing — API Gateway REST (body is a JSON string) and HTTP API
@@ -42,7 +56,7 @@ def _parse_request(event: dict) -> tuple[str, str | None]:
     body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
 
     question = body.get("question", "").strip()
-    matter_id = body.get("matter_id", "").strip() or None
+    matter_id = (body.get("matter_id") or "").strip() or None
     return question, matter_id
 
 
@@ -235,6 +249,9 @@ def lambda_handler(event: dict, context) -> dict:
     kb_config: dict = {"knowledgeBaseId": KNOWLEDGE_BASE_ID, "modelArn": BEDROCK_MODEL_ID}
     if retrieval_config:
         kb_config["retrievalConfiguration"] = retrieval_config
+    kb_config["generationConfiguration"] = {
+        "promptTemplate": {"textPromptTemplate": _GENERATION_PROMPT},
+    }
 
     # ------------------------------------------------------------------
     # Call Bedrock RetrieveAndGenerate

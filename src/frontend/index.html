@@ -875,7 +875,7 @@ let _queryController = null;
 
 async function handleQuery() {
   const question = document.getElementById('question').value.trim();
-  const matterId = document.getElementById('query-matter-id').value.trim() || null;
+  const matterId = (document.getElementById('query-matter-id')?.value || '').trim() || null;
   const btn      = document.getElementById('query-btn');
 
   if (!question) {
@@ -930,16 +930,16 @@ function renderResults({ answer = '', citations = [] }) {
     ? citations.map((c) => {
         const filename    = c.filename || (c.source_uri ? c.source_uri.split('/').pop() : 'Unknown source');
         const _CLAUSE_RE  = /(\d+(?:\.\d+)+|(?:Clause|Section)\s+\d+(?:\.\d+)*)/i;
-        const TAG         = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.08)';
+        const TAG = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.08);margin-right:6px;margin-top:4px';
         const CLAUSE_TAG  = 'display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(200,169,110,0.08);border:1px solid #c8a96e;color:#c8a96e';
         const matterTag   = c.matter_id    ? `<span style="${TAG}">Matter: ${esc(c.matter_id)}</span>` : '';
         const typeTag     = c.document_type ? `<span style="${TAG}">${esc(c.document_type)}</span>` : '';
         const uploaderTag = c.uploader_name ? `<span style="${TAG}">↑ ${esc(c.uploader_name)}</span>` : '';
         const pageTag     = c.page_reference != null ? `<span style="${TAG}">p. ${esc(String(c.page_reference))}</span>` : '';
-        const excerptHead = c.excerpt ? c.excerpt.slice(0, 50) : '';
-        const clauseMatch = excerptHead.match(_CLAUSE_RE);
-        const clauseText  = clauseMatch ? (/^\d/.test(clauseMatch[0]) ? `Clause ${clauseMatch[0]}` : clauseMatch[0]) : '';
-        const clauseTag   = clauseText ? `<span style="${CLAUSE_TAG}">${esc(clauseText)}</span>` : '';
+        const excerptHead = c.excerpt ? c.excerpt : '';
+       const clauseMatch = excerptHead.match(_CLAUSE_RE);
+const clauseText  = clauseMatch ? (/^\d/.test(clauseMatch[0]) ? `Clause ${clauseMatch[0]}` : clauseMatch[0]) : '';
+const clauseTag   = '';
         const filenameEl  = c.document_url
           ? `<a class="citation-filename" style="display:block;margin-bottom:8px" href="${esc(c.document_url)}" target="_blank" rel="noopener noreferrer">${esc(filename)}</a>`
           : `<span class="citation-filename" style="display:block;margin-bottom:8px">${esc(filename)}</span>`;
@@ -1006,28 +1006,50 @@ function esc(str) {
 }
 
 function formatAnswer(str) {
-  const PDF_RE  = /(\S+\.pdf)/gi;
-  const NAME_RE = /\b([A-Z][A-Za-z0-9.'-]*(?:\s+[A-Za-z0-9.'-]+)*?\s+(?:[Aa]greement|[Cc]ontract|[Ff]iling))\b/g;
+  // Split on double newlines or before bold titles that appear mid-text
+  let processed = str
+    .replace(/\*\*([^*]+(?:Agreement|Contract|Filing|Associates|Supply|Employment|BV|NV|GmbH)[^*]*)\*\*/g, '\n**$1**\n')
+    .replace(/\n{3,}/g, '\n\n');
 
-  function applyBold(escaped) {
-    return escaped
-      .replace(PDF_RE,  '<strong>$1</strong>')
-      .replace(NAME_RE, '<strong>$1</strong>');
+  const lines = processed.split('\n').map(l => l.trim()).filter(Boolean);
+  let html = '';
+  let inList = false;
+
+  for (const line of lines) {
+    // Check if entire line is a bold title
+    const titleMatch = line.match(/^\*\*(.+)\*\*$/);
+    const isBullet = line.startsWith('- ');
+
+    if (titleMatch) {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += `<p style="margin:16px 0 6px 0"><strong>${esc(titleMatch[1])}</strong></p>`;
+    } else if (isBullet) {
+      if (!inList) { html += '<ul style="list-style:none;padding:0;margin:0">'; inList = true; }
+      // Process bold within bullet content before escaping
+      const raw = line.replace(/^-\s*/, '');
+      const parts = raw.split(/\*\*(.+?)\*\*/g);
+      let content = '';
+      parts.forEach((p, i) => {
+        content += i % 2 === 0 ? esc(p) : `<strong>${esc(p)}</strong>`;
+      });
+      html += `<li style="display:flex;gap:10px;align-items:baseline;margin-bottom:8px">
+        <span style="color:var(--accent);flex-shrink:0">•</span>
+        <span style="line-height:1.8">${content}</span>
+      </li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      // Process bold within regular paragraph
+      const parts = line.split(/\*\*(.+?)\*\*/g);
+      let content = '';
+      parts.forEach((p, i) => {
+        content += i % 2 === 0 ? esc(p) : `<strong>${esc(p)}</strong>`;
+      });
+      html += `<p style="margin:8px 0;line-height:1.8">${content}</p>`;
+    }
   }
 
-  if (str.includes('•')) {
-    const parts = str.split('•').map(s => s.trim()).filter(Boolean);
-    return '<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px">' +
-      parts.map(p =>
-        '<li style="display:flex;gap:10px;align-items:baseline">' +
-        '<span style="color:var(--accent);flex-shrink:0;line-height:1.8">•</span>' +
-        '<span style="line-height:1.8">' + applyBold(esc(p)) + '</span>' +
-        '</li>'
-      ).join('') +
-      '</ul>';
-  }
-
-  return applyBold(esc(str)).replace(/\n/g, '<br>');
+  if (inList) html += '</ul>';
+  return html || esc(str);
 }
 
 // Cmd/Ctrl + Enter submits the query from the textarea
